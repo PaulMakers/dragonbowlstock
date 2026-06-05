@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect } from 'react';
@@ -60,7 +59,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className="flex flex-col h-full py-4">
       <div className="px-6 mb-8 flex items-center gap-3">
         <img src={LOGO_URL} alt="Logo" className="h-10 w-auto" />
-        <span className="font-headline font-bold text-lg tracking-tight text-primary">Dragonbowl</span>
+        <span className="font-headline font-bold text-xl tracking-tight text-primary">Dragonbowl</span>
       </div>
       
       <div className="flex-1 px-4 space-y-1">
