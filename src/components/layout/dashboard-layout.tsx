@@ -145,6 +145,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <span className="text-xs text-muted-foreground">Selamat Datang,</span>
               <span className="text-sm font-semibold">{user.nama}</span>
             </div>
+            {/* Tombol Logout Cepat di Header */}
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="text-destructive hover:bg-destructive/10 h-10 w-10 rounded-xl"
+              onClick={logout}
+              title="Keluar"
+            >
+              <LogOut className="h-5 w-5" />
+            </Button>
           </div>
         </header>
 

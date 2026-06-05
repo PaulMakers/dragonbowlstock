@@ -1,4 +1,3 @@
-
 "use client"
 
 import React from 'react';
@@ -12,13 +11,15 @@ import {
   Info,
   Shield,
   Smartphone,
-  CheckCircle2
+  CheckCircle2,
+  LogOut
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
 
 export default function PengaturanPage() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   return (
     <DashboardLayout>
@@ -27,6 +28,14 @@ export default function PengaturanPage() {
           <h1 className="text-3xl font-headline font-bold">Pengaturan</h1>
           <p className="text-muted-foreground">Kelola preferensi dan informasi akun Anda.</p>
         </div>
+        <Button 
+          variant="destructive" 
+          className="rounded-xl h-12 px-6 font-bold shadow-lg shadow-destructive/20"
+          onClick={logout}
+        >
+          <LogOut className="mr-2 h-5 w-5" />
+          Keluar dari Sistem
+        </Button>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
