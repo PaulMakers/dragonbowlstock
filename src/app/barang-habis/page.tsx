@@ -1,8 +1,9 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/dashboard-layout';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -17,7 +18,7 @@ import {
   Calendar as CalendarIcon, 
   CheckCircle2,
   Loader2,
-  Search
+  AlertCircle
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { id as localeId } from 'date-fns/locale';
@@ -25,6 +26,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
+import { Separator } from '@/components/ui/separator';
 
 type ItemEntry = {
   namaBarang: string;
@@ -80,7 +82,7 @@ export default function BarangHabisPage() {
   const handleSave = async () => {
     const validEntries = entries.filter(e => e.namaBarang && e.jumlah && e.satuan);
     if (validEntries.length === 0) {
-      toast({ variant: 'destructive', title: 'Peringatan', description: 'Silakan isi setidaknya satu barang with lengkap.' });
+      toast({ variant: 'destructive', title: 'Peringatan', description: 'Silakan isi setidaknya satu barang dengan lengkap.' });
       return;
     }
 
@@ -147,44 +149,37 @@ export default function BarangHabisPage() {
         <div className="lg:col-span-2 space-y-6">
           {entries.map((entry, index) => (
             <Card key={index} className="border-none bg-card card-shadow rounded-2xl overflow-hidden animate-in slide-in-from-bottom-2 duration-300">
-              <CardHeader className="bg-muted/30 pb-4 flex flex-row items-center justify-between">
+              <div className="bg-muted/30 p-4 flex flex-row items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm">
                     {index + 1}
                   </div>
-                  <CardTitle className="text-lg">Barang Ke-{index + 1}</CardTitle>
+                  <h3 className="text-lg font-bold">Barang Ke-{index + 1}</h3>
                 </div>
                 {entries.length > 1 && (
                   <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10" onClick={() => removeEntry(index)}>
                     <Trash2 className="h-5 w-5" />
                   </Button>
                 )}
-              </CardHeader>
+              </div>
               <CardContent className="p-6 space-y-4">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Pilih atau Ketik Nama Barang</Label>
-                    <div className="flex gap-2">
-                       <Select 
-                        value={entry.namaBarang} 
-                        onValueChange={(v) => updateEntry(index, 'namaBarang', v)}
-                      >
-                        <SelectTrigger className="h-11 rounded-xl">
-                          <SelectValue placeholder="Pilih Barang" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {masterItems.map((item) => (
-                            <SelectItem key={item.id} value={item.namaBarang}>{item.namaBarang}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <Input 
-                      placeholder="Atau ketik manual jika tidak ada..." 
-                      className="h-11 rounded-xl"
-                      value={entry.namaBarang}
-                      onChange={(e) => updateEntry(index, 'namaBarang', e.target.value)}
-                    />
+                    <Label>Pilih Barang</Label>
+                    <Select 
+                      value={entry.namaBarang} 
+                      onValueChange={(v) => updateEntry(index, 'namaBarang', v)}
+                    >
+                      <SelectTrigger className="h-11 rounded-xl">
+                        <SelectValue placeholder="Pilih Barang" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {masterItems.map((item) => (
+                          <SelectItem key={item.id} value={item.namaBarang}>{item.namaBarang}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-[10px] text-muted-foreground">Jika tidak ada di daftar, minta admin menambahkannya di Master Barang.</p>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2">
@@ -242,12 +237,12 @@ export default function BarangHabisPage() {
 
         <div className="space-y-6">
           <Card className="border-none bg-card card-shadow rounded-2xl overflow-hidden sticky top-24">
-            <CardHeader className="bg-primary/5">
-              <CardTitle className="text-lg flex items-center gap-2">
+            <div className="bg-primary/5 p-4">
+              <h3 className="text-lg font-bold flex items-center gap-2">
                 <AlertCircle className="h-5 w-5 text-primary" />
                 Informasi Penting
-              </CardTitle>
-            </CardHeader>
+              </h3>
+            </div>
             <CardContent className="p-6 space-y-4">
               <p className="text-sm leading-relaxed text-muted-foreground">
                 Mohon pastikan data yang diinput sudah sesuai dengan ketersediaan fisik di gudang/outlet. 

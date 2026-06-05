@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState } from 'react';
@@ -10,13 +11,15 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { LOGO_URL } from '@/lib/constants';
-import { Loader2, Lock, User as UserIcon, ShieldAlert } from 'lucide-react';
+import { Loader2, Lock, User as UserIcon, ShieldAlert, AlertTriangle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [bootstrapping, setBootstrapping] = useState(false);
+  const [confirmInit, setConfirmInit] = useState(false);
   const { login } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
@@ -44,8 +47,6 @@ export default function LoginPage() {
   };
 
   const handleBootstrapAdmin = async () => {
-    if (!confirm('Buat akun admin master (admin/dragonbowl) sekarang? Ini akan membuat sheet baru jika belum ada.')) return;
-    
     setBootstrapping(true);
     try {
       await callBackend('addPengguna', { 
@@ -58,11 +59,12 @@ export default function LoginPage() {
         title: "Berhasil", 
         description: "Akun admin (admin/dragonbowl) telah dibuat. Silakan login sekarang." 
       });
+      setConfirmInit(false);
     } catch (err: any) {
       toast({ 
         variant: "destructive", 
         title: "Gagal Inisialisasi", 
-        description: err.message || "Gagal membuat akun admin. Pastikan URL Apps Script benar." 
+        description: err.message || "Gagal membuat akun admin. Periksa koneksi atau URL Apps Script." 
       });
     } finally {
       setBootstrapping(false);
@@ -82,7 +84,7 @@ export default function LoginPage() {
           <p className="text-muted-foreground mt-2 font-medium">Sistem Manajemen Stok Terpadu</p>
         </div>
 
-        <Card className="border-border/50 bg-card/50 backdrop-blur-xl shadow-2xl rounded-2xl">
+        <Card className="border-border/50 bg-card/50 backdrop-blur-xl shadow-2xl rounded-2xl overflow-hidden">
           <CardHeader className="space-y-1 pt-8">
             <CardTitle className="text-2xl font-bold">Masuk ke Akun</CardTitle>
             <CardDescription>
@@ -136,22 +138,49 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            <div className="mt-8 pt-6 border-t border-border/50 text-center">
-              <p className="text-xs text-muted-foreground mb-3 font-medium uppercase tracking-wider">Pengaturan Awal</p>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="w-full h-10 rounded-xl border-primary/20 hover:bg-primary/5 text-primary gap-2"
-                onClick={handleBootstrapAdmin}
-                disabled={bootstrapping}
-              >
-                {bootstrapping ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <ShieldAlert className="h-4 w-4" />
-                )}
-                Inisialisasi Admin (admin/dragonbowl)
-              </Button>
+            <div className="mt-8 pt-6 border-t border-border/50">
+              {!confirmInit ? (
+                <div className="text-center">
+                  <p className="text-xs text-muted-foreground mb-3 font-medium uppercase tracking-wider">Pengaturan Awal</p>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full h-10 rounded-xl border-primary/20 hover:bg-primary/5 text-primary gap-2"
+                    onClick={() => setConfirmInit(true)}
+                  >
+                    <ShieldAlert className="h-4 w-4" />
+                    Inisialisasi Admin (admin/dragonbowl)
+                  </Button>
+                </div>
+              ) : (
+                <Alert className="bg-primary/5 border-primary/20 animate-in fade-in zoom-in duration-200">
+                  <AlertTriangle className="h-4 w-4 text-primary" />
+                  <AlertTitle className="text-sm font-bold">Konfirmasi Inisialisasi</AlertTitle>
+                  <AlertDescription className="text-xs mt-1">
+                    Ini akan membuat sheet baru dan akun admin utama. Lanjutkan?
+                    <div className="flex gap-2 mt-3">
+                      <Button 
+                        size="sm" 
+                        className="h-8 flex-1 primary-gradient" 
+                        onClick={handleBootstrapAdmin}
+                        disabled={bootstrapping}
+                      >
+                        {bootstrapping ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : null}
+                        Ya, Buat
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="h-8 flex-1" 
+                        onClick={() => setConfirmInit(false)}
+                        disabled={bootstrapping}
+                      >
+                        Batal
+                      </Button>
+                    </div>
+                  </AlertDescription>
+                </Alert>
+              )}
             </div>
           </CardContent>
         </Card>

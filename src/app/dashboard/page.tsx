@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react';
@@ -10,14 +11,14 @@ import {
   Clock, 
   TrendingUp,
   Package,
-  Plus,
-  ArrowRight
+  Plus
 } from 'lucide-react';
 import { callBackend } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<any>(null);
@@ -30,7 +31,6 @@ export default function DashboardPage() {
         const statsRes = await callBackend('getStatistik', { hari: 7 });
         setStats(statsRes);
         
-        // Get today's date formatted as DD MMMM YYYY
         const today = new Intl.DateTimeFormat('id-ID', {
           day: '2-digit',
           month: 'long',
