@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react';
@@ -304,7 +305,7 @@ export default function PenggunaPage() {
                     <SelectTrigger className="h-11 rounded-xl">
                       <SelectValue placeholder="Pilih Role" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent side="bottom">
                       <SelectItem value="pegawai">Pegawai</SelectItem>
                       <SelectItem value="admin">Admin</SelectItem>
                     </SelectContent>

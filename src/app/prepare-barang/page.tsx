@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react';
@@ -119,7 +120,7 @@ export default function PrepareBarangPage() {
                 {date ? format(date, 'PPP', { locale: localeId }) : <span>Pilih Tanggal</span>}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="end">
+            <PopoverContent className="w-auto p-0" align="end" side="bottom">
               <Calendar
                 mode="single"
                 selected={date}

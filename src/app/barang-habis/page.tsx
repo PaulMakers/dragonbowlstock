@@ -133,7 +133,7 @@ export default function BarangHabisPage() {
                 {date ? format(date, 'PPP', { locale: localeId }) : <span>Pilih Tanggal</span>}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="end">
+            <PopoverContent className="w-auto p-0" align="end" side="bottom">
               <Calendar
                 mode="single"
                 selected={date}
@@ -173,7 +173,7 @@ export default function BarangHabisPage() {
                       <SelectTrigger className="h-11 rounded-xl">
                         <SelectValue placeholder="Pilih Barang" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent side="bottom">
                         {masterItems.map((item) => (
                           <SelectItem key={item.id} value={item.namaBarang}>{item.namaBarang}</SelectItem>
                         ))}
