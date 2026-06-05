@@ -2,16 +2,21 @@ import { APPS_SCRIPT_URL } from './constants';
 
 export async function callBackend(action: string, payload: any = {}) {
   try {
-    const params = new URLSearchParams();
-    params.append('action', action);
-    params.append('contents', JSON.stringify(payload));
+    // GAS doPost(e) reads action from e.parameter.action (URL query params or form fields)
+    // and payload from e.postData.contents (raw body).
+    // We put action in the URL to satisfy e.parameter.action
+    const url = new URL(APPS_SCRIPT_URL);
+    url.searchParams.append('action', action);
 
-    const response = await fetch(APPS_SCRIPT_URL, {
+    const response = await fetch(url.toString(), {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        // Use text/plain to avoid CORS preflight (simple request).
+        // GAS handles this perfectly and populates e.postData.contents.
+        'Content-Type': 'text/plain',
       },
-      body: params.toString(),
+      // Send the payload as a raw JSON string to satisfy JSON.parse(e.postData.contents)
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
@@ -25,7 +30,6 @@ export async function callBackend(action: string, payload: any = {}) {
       data = JSON.parse(text);
     } catch (e) {
       // If the response is not valid JSON, it might be an error page or an echo of the request.
-      // We throw a descriptive error to help with debugging the backend response content.
       throw new Error(`Server returned invalid JSON response: "${text.substring(0, 100)}${text.length > 100 ? '...' : ''}"`);
     }
 

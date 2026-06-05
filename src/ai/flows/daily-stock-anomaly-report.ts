@@ -26,16 +26,15 @@ export type DailyStockAnomalyReportOutput = z.infer<typeof DailyStockAnomalyRepo
  * Calls the Google Apps Script API endpoint.
  */
 async function callAppsScript(action: string, data: any = {}): Promise<any> {
-  const params = new URLSearchParams();
-  params.append('action', action);
-  params.append('contents', JSON.stringify(data));
+  const url = new URL(APPS_SCRIPT_URL);
+  url.searchParams.append('action', action);
 
-  const response = await fetch(APPS_SCRIPT_URL, {
+  const response = await fetch(url.toString(), {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
+      'Content-Type': 'text/plain',
     },
-    body: params.toString(),
+    body: JSON.stringify(data),
   });
 
   if (!response.ok) {
