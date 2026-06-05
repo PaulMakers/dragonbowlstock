@@ -10,12 +10,13 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { LOGO_URL } from '@/lib/constants';
-import { Loader2, Lock, User as UserIcon } from 'lucide-react';
+import { Loader2, Lock, User as UserIcon, ShieldAlert } from 'lucide-react';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [bootstrapping, setBootstrapping] = useState(false);
   const { login } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
@@ -45,6 +46,32 @@ export default function LoginPage() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleBootstrapAdmin = async () => {
+    if (!confirm('Buat akun admin master (admin/dragonbowl) sekarang?')) return;
+    
+    setBootstrapping(true);
+    try {
+      await callBackend('addPengguna', { 
+        username: 'admin', 
+        password: 'dragonbowl', 
+        nama: 'Administrator', 
+        role: 'admin' 
+      });
+      toast({ 
+        title: "Berhasil", 
+        description: "Akun admin (admin/dragonbowl) telah dibuat. Silakan login." 
+      });
+    } catch (err: any) {
+      toast({ 
+        variant: "destructive", 
+        title: "Gagal", 
+        description: "Gagal membuat akun admin atau akun mungkin sudah ada." 
+      });
+    } finally {
+      setBootstrapping(false);
     }
   };
 
@@ -114,6 +141,24 @@ export default function LoginPage() {
                 ) : "Masuk Sekarang"}
               </Button>
             </form>
+
+            <div className="mt-8 pt-6 border-t border-border/50 text-center">
+              <p className="text-xs text-muted-foreground mb-3 font-medium uppercase tracking-wider">Pengaturan Awal</p>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full h-10 rounded-xl border-primary/20 hover:bg-primary/5 text-primary gap-2"
+                onClick={handleBootstrapAdmin}
+                disabled={bootstrapping}
+              >
+                {bootstrapping ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <ShieldAlert className="h-4 w-4" />
+                )}
+                Inisialisasi Admin (admin/dragonbowl)
+              </Button>
+            </div>
           </CardContent>
         </Card>
         
