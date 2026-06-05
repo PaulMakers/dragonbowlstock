@@ -31,17 +31,11 @@ export default function LoginPage() {
         login(response.user);
         toast({ title: "Login Berhasil", description: `Selamat datang, ${response.user.nama}` });
         router.push('/dashboard');
-      } else {
-        toast({ 
-          variant: "destructive", 
-          title: "Login Gagal", 
-          description: response.error || "Username atau password salah." 
-        });
       }
     } catch (err: any) {
       toast({ 
         variant: "destructive", 
-        title: "Terjadi Kesalahan", 
+        title: "Login Gagal", 
         description: err.message || "Gagal menghubungi server." 
       });
     } finally {
@@ -50,7 +44,7 @@ export default function LoginPage() {
   };
 
   const handleBootstrapAdmin = async () => {
-    if (!confirm('Buat akun admin master (admin/dragonbowl) sekarang?')) return;
+    if (!confirm('Buat akun admin master (admin/dragonbowl) sekarang? Ini akan membuat sheet baru jika belum ada.')) return;
     
     setBootstrapping(true);
     try {
@@ -62,13 +56,13 @@ export default function LoginPage() {
       });
       toast({ 
         title: "Berhasil", 
-        description: "Akun admin (admin/dragonbowl) telah dibuat. Silakan login." 
+        description: "Akun admin (admin/dragonbowl) telah dibuat. Silakan login sekarang." 
       });
     } catch (err: any) {
       toast({ 
         variant: "destructive", 
-        title: "Gagal", 
-        description: "Gagal membuat akun admin atau akun mungkin sudah ada." 
+        title: "Gagal Inisialisasi", 
+        description: err.message || "Gagal membuat akun admin. Pastikan URL Apps Script benar." 
       });
     } finally {
       setBootstrapping(false);

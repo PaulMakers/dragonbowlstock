@@ -4,7 +4,6 @@ export async function callBackend(action: string, payload: any = {}) {
   try {
     // GAS doPost(e) reads action from e.parameter.action (URL query params or form fields)
     // and payload from e.postData.contents (raw body).
-    // We put action in the URL to satisfy e.parameter.action
     const url = new URL(APPS_SCRIPT_URL);
     url.searchParams.append('action', action);
 
@@ -12,7 +11,6 @@ export async function callBackend(action: string, payload: any = {}) {
       method: 'POST',
       headers: {
         // Use text/plain to avoid CORS preflight (simple request).
-        // GAS handles this perfectly and populates e.postData.contents.
         'Content-Type': 'text/plain',
       },
       // Send the payload as a raw JSON string to satisfy JSON.parse(e.postData.contents)
@@ -34,6 +32,10 @@ export async function callBackend(action: string, payload: any = {}) {
     }
 
     if (data.error) {
+      // Special handling for common initial setup errors
+      if (data.error.includes('tidak ditemukan')) {
+        throw new Error(`${data.error}. Silakan klik tombol 'Inisialisasi Admin' di halaman login terlebih dahulu.`);
+      }
       throw new Error(data.error);
     }
     
