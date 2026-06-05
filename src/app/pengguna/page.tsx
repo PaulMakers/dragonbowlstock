@@ -305,7 +305,7 @@ export default function PenggunaPage() {
                     <SelectTrigger className="h-11 rounded-xl">
                       <SelectValue placeholder="Pilih Role" />
                     </SelectTrigger>
-                    <SelectContent side="bottom">
+                    <SelectContent side="bottom" position="popper" sideOffset={5}>
                       <SelectItem value="pegawai">Pegawai</SelectItem>
                       <SelectItem value="admin">Admin</SelectItem>
                     </SelectContent>

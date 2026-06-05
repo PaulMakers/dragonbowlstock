@@ -75,7 +75,7 @@ export default function RiwayatPage() {
                 {date ? format(date, 'PPP', { locale: localeId }) : <span>Pilih Tanggal</span>}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="end" side="bottom">
+            <PopoverContent className="w-auto p-0" align="end" side="bottom" sideOffset={5}>
               <Calendar
                 mode="single"
                 selected={date}

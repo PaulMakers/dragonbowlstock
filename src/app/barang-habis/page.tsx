@@ -173,7 +173,7 @@ export default function BarangHabisPage() {
                       <SelectTrigger className="h-11 rounded-xl">
                         <SelectValue placeholder="Pilih Barang" />
                       </SelectTrigger>
-                      <SelectContent side="bottom">
+                      <SelectContent side="bottom" position="popper" sideOffset={5}>
                         {masterItems.map((item) => (
                           <SelectItem key={item.id} value={item.namaBarang}>{item.namaBarang}</SelectItem>
                         ))}
