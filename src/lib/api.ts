@@ -29,8 +29,9 @@ export async function callBackend(action: string, payload: any = {}) {
     }
 
     if (data.error) {
-      if (data.error.includes('tidak ditemukan') || data.error.includes("reading 'appendRow'")) {
-        throw new Error(`${data.error}. Silakan klik tombol 'Inisialisasi Admin' di halaman login terlebih dahulu atau pastikan Sheet 'master_barang' sudah ada.`);
+      // Improved error detection for missing sheets in Apps Script
+      if (data.error.includes('tidak ditemukan') || data.error.includes("reading 'appendRow'") || data.error.includes('null')) {
+        throw new Error(`Terjadi masalah pada Database (Sheet). Pastikan Anda sudah mengupdate kode di Google Apps Script dan klik 'Inisialisasi Admin' di halaman login.`);
       }
       throw new Error(data.error);
     }

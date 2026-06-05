@@ -71,10 +71,7 @@ export default function MasterBarangPage() {
       const res = await callBackend('getMasterBarang');
       setItems(res.data || []);
     } catch (err: any) {
-      // Don't show toast if it's just the initial "not found"
-      if (!err.message.includes('tidak ditemukan')) {
-        toast({ variant: 'destructive', title: 'Error', description: 'Gagal memuat master barang' });
-      }
+      console.error('Fetch Error:', err);
       setItems([]);
     } finally {
       setLoading(false);
@@ -140,12 +137,12 @@ export default function MasterBarangPage() {
     setSeeding(true);
     let count = 0;
     try {
-      // Create a unique list to avoid duplicates if some exist
       const existingNames = new Set(items.map(i => i.namaBarang?.toLowerCase() || ''));
       const itemsToSeed = INITIAL_ITEMS.filter(name => !existingNames.has(name.toLowerCase()));
 
       if (itemsToSeed.length === 0) {
         toast({ title: 'Info', description: 'Semua barang sudah ada di sistem.' });
+        setSeeding(false);
         return;
       }
 
@@ -163,7 +160,7 @@ export default function MasterBarangPage() {
       toast({ 
         variant: 'destructive', 
         title: 'Gagal Seed Data', 
-        description: err.message || 'Gagal melakukan seed data. Pastikan Apps Script sudah diperbarui.' 
+        description: err.message || 'Gagal melakukan seed data. Silakan update kode Apps Script Anda.' 
       });
     } finally {
       setSeeding(false);
