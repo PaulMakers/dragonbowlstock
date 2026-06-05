@@ -26,8 +26,9 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!username || !password) return;
+    
     setLoading(true);
-
     try {
       const response = await callBackend('login', { username, password });
       if (response.success) {
@@ -49,22 +50,26 @@ export default function LoginPage() {
   const handleBootstrapAdmin = async () => {
     setBootstrapping(true);
     try {
-      await callBackend('addPengguna', { 
+      const res = await callBackend('addPengguna', { 
         username: 'admin', 
         password: 'dragonbowl', 
         nama: 'Administrator', 
         role: 'admin' 
       });
-      toast({ 
-        title: "Berhasil", 
-        description: "Akun admin (admin/dragonbowl) telah dibuat. Silakan login sekarang." 
-      });
-      setConfirmInit(false);
+      
+      if (res.success) {
+        toast({ 
+          title: "Berhasil", 
+          description: "Akun admin (admin/dragonbowl) telah dibuat. Silakan login sekarang." 
+        });
+        setConfirmInit(false);
+      }
     } catch (err: any) {
+      console.error('Bootstrap Error:', err);
       toast({ 
         variant: "destructive", 
         title: "Gagal Inisialisasi", 
-        description: err.message || "Gagal membuat akun admin. Periksa koneksi atau URL Apps Script." 
+        description: err.message || "Gagal membuat akun admin. Pastikan URL Apps Script benar dan sudah di-deploy sebagai 'Anyone'." 
       });
     } finally {
       setBootstrapping(false);
@@ -157,7 +162,7 @@ export default function LoginPage() {
                   <AlertTriangle className="h-4 w-4 text-primary" />
                   <AlertTitle className="text-sm font-bold">Konfirmasi Inisialisasi</AlertTitle>
                   <AlertDescription className="text-xs mt-1">
-                    Ini akan membuat sheet baru dan akun admin utama. Lanjutkan?
+                    Ini akan membuat sheet baru dan akun admin utama di Google Sheets Anda. Lanjutkan?
                     <div className="flex gap-2 mt-3">
                       <Button 
                         size="sm" 

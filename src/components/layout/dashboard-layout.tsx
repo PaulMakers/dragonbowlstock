@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect } from 'react';
@@ -16,7 +17,7 @@ import {
   FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import Link from 'next/link';
 import { LOGO_URL } from '@/lib/constants';
 import { cn } from '@/lib/utils';
@@ -124,6 +125,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="p-0 w-72 border-r bg-card">
+                <SheetHeader className="sr-only">
+                  <SheetTitle>Menu Navigasi</SheetTitle>
+                  <SheetDescription>Akses navigasi utama Dragonbowl Stock Management</SheetDescription>
+                </SheetHeader>
                 <SidebarContent />
               </SheetContent>
             </Sheet>
