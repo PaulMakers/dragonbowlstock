@@ -149,14 +149,14 @@ export default function MasterBarangPage() {
         return;
       }
 
-      // Gunakan loop sekuensial untuk menghindari limitasi Google Apps Script saat request terlalu cepat
       for (const name of itemsToSeed) {
         try {
           await callBackend('addMasterBarang', { namaBarang: name });
           count++;
+          // Tambahkan delay 200ms agar Google Apps Script tidak rate-limited (Failed to fetch)
+          await new Promise(resolve => setTimeout(resolve, 200));
         } catch (e) {
           console.error(`Gagal memasukkan ${name}:`, e);
-          // Tetap lanjut ke item berikutnya jika satu gagal
         }
       }
       
