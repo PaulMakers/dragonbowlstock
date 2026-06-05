@@ -15,8 +15,8 @@ import {
   Trash2, 
   Loader2,
   Package,
-  MoreVertical,
-  ChevronRight
+  Database,
+  AlertCircle
 } from 'lucide-react';
 import {
   Dialog,
@@ -26,12 +26,32 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
+const INITIAL_ITEMS = [
+  // Dapur/Kitchen
+  'mie kuning', 'mie warna warni', 'ayam kecap', 'bawang putih goreng', 'pangsit', 'bakso goreng', 'bumbu mie',
+  'mie misua', 'ayam misua', 'jamur', 'telur omega',
+  'ayam katsu prepare', 'Ayam sambal matah', 'sambal matah', 'daun jeruk', 'bawang merah', 'sereh', 'cabe',
+  'ayam karage', 'ayam woku', 'ayam rica', 'pempek', 'kuah cuko', 'cireng', 'Tahu pong', 'cekerr mercon prepare', 
+  'bakso goreng', 'platter', 'kentang',
+  'tomat', 'wortel', 'timun', 'sawi hijau', 'pakcoy', 'selada', 'daun bawang',
+  'kuah cuko', 'kuah kaldu', 'totole', 'garam', 'micin', 'lada', 'beras', 'minyak goreng', 'sambal', 'chili oil',
+  'bawang merah', 'roti tawar', 'selai roti', 'margarin', 'kecap', 'saus tomat', 'mayonaise', 'telur biasa',
+  // Minuman/Beverage
+  'Kolang Kaling', 'Creamer', 'Sirsak', 'Kelapa Kopyor', 'Kuah Jahe', 'Jelly Hijau', 'Ketan Hitam', 'Anggur', 
+  'Strawberry', 'Semangka', 'Semangka Kuning', 'Tapai', 'Melon', 'Nanas', 'Keju', 'Sirup Cocopandan', 'Mutiara', 
+  'Teh', 'Cendol', 'Rumput laut', 'Kacang Hijau', 'Ronde Kecil', 'Ronde Besar', 'Roti Angsle', 'Alpukat', 
+  'Susu Kental Manis', 'Nata de Coco', 'Simple Sirup ( Air Gula )', 'Mangga', 'Jeruk', 'Cincau', 'Boba', 'Nangka', 
+  'Kelapa Biasa ( Frozen )', 'Es Batu', 'Jus Strawberry', 'Jus Alpukat', 'Jus Mangga', 'Ketan Putih', 'Kacang Tanah', 
+  'Selasih', 'Jus Blackberry', 'Thai Tea',
+  // Bagian Depan/Kulkas
+  'Sosis Kanzler', 'Air Mineral Kecil', 'Air Mineral Sedang', 'Air Mineral Besar', 'Air Kelapa', 'Susu Cimory', 'Cilok',
+  // Cup/Tempat Makanan
+  'Bowl Besar', 'Bowl Sedang', 'Bowl Kecil', 'Tempat Es ( Dine In )', 'Tempat Es ( Take Away )', 'Tempat Cilok', 
+  'Gelas Teh Es', 'Tempat Platter Combo Thai Tea',
+  // Lain-Lain
+  'Sumpit', 'Sendok Plastik', 'Sedotan', 'Plastik Kecil Untuk Stock Adonan Es'
+];
 
 export default function MasterBarangPage() {
   const { toast } = useToast();
@@ -42,6 +62,7 @@ export default function MasterBarangPage() {
   const [editingItem, setEditingItem] = useState<any>(null);
   const [formData, setFormData] = useState({ namaBarang: '' });
   const [submitting, setSubmitting] = useState(false);
+  const [seeding, setSeeding] = useState(false);
 
   const fetchItems = async () => {
     setLoading(true);
@@ -104,6 +125,33 @@ export default function MasterBarangPage() {
     }
   };
 
+  const handleSeedData = async () => {
+    if (!confirm('Apakah Anda ingin memasukkan daftar awal barang (Kitchen, Beverage, dll) secara otomatis?')) return;
+    
+    setSeeding(true);
+    let count = 0;
+    try {
+      // Create a unique list to avoid duplicates if some exist
+      const existingNames = new Set(items.map(i => i.namaBarang.toLowerCase()));
+      const itemsToSeed = INITIAL_ITEMS.filter(name => !existingNames.has(name.toLowerCase()));
+
+      for (const name of itemsToSeed) {
+        await callBackend('addMasterBarang', { namaBarang: name });
+        count++;
+      }
+      
+      toast({ 
+        title: 'Berhasil', 
+        description: `${count} barang awal telah ditambahkan ke sistem.` 
+      });
+      fetchItems();
+    } catch (err) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Gagal melakukan seed data.' });
+    } finally {
+      setSeeding(false);
+    }
+  };
+
   const filteredItems = items.filter(i => i.namaBarang.toLowerCase().includes(search.toLowerCase()));
 
   return (
@@ -113,9 +161,17 @@ export default function MasterBarangPage() {
           <h1 className="text-3xl font-headline font-bold">Master Barang</h1>
           <p className="text-muted-foreground">Kelola daftar referensi barang untuk seluruh outlet.</p>
         </div>
-        <Button onClick={handleOpenAdd} className="h-12 px-6 rounded-xl primary-gradient font-semibold">
-          <Plus className="mr-2 h-5 w-5" /> Tambah Barang
-        </Button>
+        <div className="flex gap-2">
+          {items.length === 0 && !loading && (
+             <Button onClick={handleSeedData} variant="outline" className="h-12 px-6 rounded-xl border-primary/40 text-primary hover:bg-primary/5" disabled={seeding}>
+              {seeding ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Database className="mr-2 h-5 w-5" />}
+              {seeding ? 'Memproses...' : 'Seed Data Awal'}
+            </Button>
+          )}
+          <Button onClick={handleOpenAdd} className="h-12 px-6 rounded-xl primary-gradient font-semibold">
+            <Plus className="mr-2 h-5 w-5" /> Tambah Barang
+          </Button>
+        </div>
       </div>
 
       <Card className="border-none card-shadow rounded-2xl overflow-hidden bg-card">
@@ -165,6 +221,12 @@ export default function MasterBarangPage() {
               <Package className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
               <h3 className="font-headline text-xl font-bold">Tidak ada barang</h3>
               <p className="text-muted-foreground mt-2">Daftar master barang masih kosong.</p>
+              {items.length === 0 && (
+                <div className="mt-6 p-4 bg-primary/5 rounded-xl border border-primary/20 max-w-sm mx-auto">
+                  <AlertCircle className="h-6 w-6 text-primary mx-auto mb-2" />
+                  <p className="text-sm text-primary font-medium">Klik "Seed Data Awal" untuk memasukkan daftar barang Kitchen, Beverage, dll secara otomatis.</p>
+                </div>
+              )}
             </div>
           )}
         </CardContent>
