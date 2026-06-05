@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react';
@@ -69,8 +70,12 @@ export default function MasterBarangPage() {
     try {
       const res = await callBackend('getMasterBarang');
       setItems(res.data || []);
-    } catch (err) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Gagal memuat master barang' });
+    } catch (err: any) {
+      // Don't show toast if it's just the initial "not found"
+      if (!err.message.includes('tidak ditemukan')) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Gagal memuat master barang' });
+      }
+      setItems([]);
     } finally {
       setLoading(false);
     }
@@ -118,8 +123,12 @@ export default function MasterBarangPage() {
       }
       setIsModalOpen(false);
       fetchItems();
-    } catch (err) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Gagal menyimpan data.' });
+    } catch (err: any) {
+      toast({ 
+        variant: 'destructive', 
+        title: 'Error', 
+        description: err.message || 'Gagal menyimpan data.' 
+      });
     } finally {
       setSubmitting(false);
     }
@@ -132,8 +141,13 @@ export default function MasterBarangPage() {
     let count = 0;
     try {
       // Create a unique list to avoid duplicates if some exist
-      const existingNames = new Set(items.map(i => i.namaBarang.toLowerCase()));
+      const existingNames = new Set(items.map(i => i.namaBarang?.toLowerCase() || ''));
       const itemsToSeed = INITIAL_ITEMS.filter(name => !existingNames.has(name.toLowerCase()));
+
+      if (itemsToSeed.length === 0) {
+        toast({ title: 'Info', description: 'Semua barang sudah ada di sistem.' });
+        return;
+      }
 
       for (const name of itemsToSeed) {
         await callBackend('addMasterBarang', { namaBarang: name });
@@ -145,14 +159,18 @@ export default function MasterBarangPage() {
         description: `${count} barang awal telah ditambahkan ke sistem.` 
       });
       fetchItems();
-    } catch (err) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Gagal melakukan seed data.' });
+    } catch (err: any) {
+      toast({ 
+        variant: 'destructive', 
+        title: 'Gagal Seed Data', 
+        description: err.message || 'Gagal melakukan seed data. Pastikan Apps Script sudah diperbarui.' 
+      });
     } finally {
       setSeeding(false);
     }
   };
 
-  const filteredItems = items.filter(i => i.namaBarang.toLowerCase().includes(search.toLowerCase()));
+  const filteredItems = items.filter(i => i.namaBarang?.toLowerCase().includes(search.toLowerCase()));
 
   return (
     <DashboardLayout>
@@ -202,7 +220,7 @@ export default function MasterBarangPage() {
                     </div>
                     <div>
                       <p className="font-bold text-lg">{item.namaBarang}</p>
-                      <p className="text-xs text-muted-foreground">ID: {item.id.substring(0, 8)}...</p>
+                      <p className="text-xs text-muted-foreground">ID: {item.id?.substring(0, 8)}...</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">

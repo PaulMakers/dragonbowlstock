@@ -29,8 +29,8 @@ export async function callBackend(action: string, payload: any = {}) {
     }
 
     if (data.error) {
-      if (data.error.includes('tidak ditemukan')) {
-        throw new Error(`${data.error}. Silakan klik tombol 'Inisialisasi Admin' di halaman login terlebih dahulu.`);
+      if (data.error.includes('tidak ditemukan') || data.error.includes("reading 'appendRow'")) {
+        throw new Error(`${data.error}. Silakan klik tombol 'Inisialisasi Admin' di halaman login terlebih dahulu atau pastikan Sheet 'master_barang' sudah ada.`);
       }
       throw new Error(data.error);
     }
