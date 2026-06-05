@@ -57,7 +57,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md z-10">
         <div className="text-center mb-8">
           <img src={LOGO_URL} alt="Dragon Bowl" className="h-24 w-auto mx-auto mb-4 drop-shadow-xl" />
-          <h1 className="font-headline text-3xl font-bold text-primary tracking-tight">DragonStock</h1>
+          <h1 className="font-headline text-2xl font-bold text-primary tracking-tight">Dragonbowl Stock Management</h1>
           <p className="text-muted-foreground mt-2 font-medium">Sistem Manajemen Stok Terpadu</p>
         </div>
 

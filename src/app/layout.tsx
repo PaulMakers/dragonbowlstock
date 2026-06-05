@@ -3,13 +3,13 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'DragonStock | Stock Management',
+  title: 'Dragonbowl Stock Management',
   description: 'Smart stock management system for Dragon Bowl Cafe & Restaurant',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'DragonStock',
+    title: 'Dragonbowl Stock',
   },
 };
 
