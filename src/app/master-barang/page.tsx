@@ -162,7 +162,7 @@ export default function MasterBarangPage() {
   };
 
   const handleOpenEdit = (item: any) => {
-    setEditingItem(item);
+    setEditingUser(item);
     setFormData({ namaBarang: item.namaBarang, kategori: item.kategori || 'Dapur/Kitchen' });
     setIsModalOpen(true);
   };
@@ -229,6 +229,7 @@ export default function MasterBarangPage() {
               kategori: initialItem.kategori 
             });
             countUpdated++;
+            // Beri sedikit delay agar Apps Script tidak overload
             await new Promise(resolve => setTimeout(resolve, 150));
           }
         } else {
