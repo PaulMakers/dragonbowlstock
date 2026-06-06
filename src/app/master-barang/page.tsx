@@ -111,15 +111,15 @@ const INITIAL_ITEMS = [
   { nama: 'Air Kelapa', kategori: 'Kulkas/Bagian Depan' },
   { nama: 'Susu Cimory', kategori: 'Kulkas/Bagian Depan' },
   { nama: 'Cilok', kategori: 'Kulkas/Bagian Depan' },
-  // Cup/wadah
-  { nama: 'Bowl Besar', kategori: 'Cup/wadah' },
-  { nama: 'Bowl Sedang', kategori: 'Cup/wadah' },
-  { nama: 'Bowl Kecil', kategori: 'Cup/wadah' },
-  { nama: 'Tempat Es ( Dine In )', kategori: 'Cup/wadah' },
-  { nama: 'Tempat Es ( Take Away )', kategori: 'Cup/wadah' },
-  { nama: 'Tempat Cilok', kategori: 'Cup/wadah' },
-  { nama: 'Gelas Teh Es', kategori: 'Cup/wadah' },
-  { nama: 'Tempat Platter Combo Thai Tea', kategori: 'Cup/wadah' },
+  // Packaging/Cup
+  { nama: 'Bowl Besar', kategori: 'Packaging/Cup' },
+  { nama: 'Bowl Sedang', kategori: 'Packaging/Cup' },
+  { nama: 'Bowl Kecil', kategori: 'Packaging/Cup' },
+  { nama: 'Tempat Es ( Dine In )', kategori: 'Packaging/Cup' },
+  { nama: 'Tempat Es ( Take Away )', kategori: 'Packaging/Cup' },
+  { nama: 'Tempat Cilok', kategori: 'Packaging/Cup' },
+  { nama: 'Gelas Teh Es', kategori: 'Packaging/Cup' },
+  { nama: 'Tempat Platter Combo Thai Tea', kategori: 'Packaging/Cup' },
   // Lain-Lain
   { nama: 'Sumpit', kategori: 'Lain-Lain' },
   { nama: 'Sendok Plastik', kategori: 'Lain-Lain' },
@@ -221,7 +221,7 @@ export default function MasterBarangPage() {
         if (existing) {
           // Periksa apakah kategori perlu diperbarui (kosong atau nama lama)
           const needsUpdate = !existing.kategori || 
-                            existing.kategori === 'Packaging/Cup' || 
+                            existing.kategori === 'Cup/wadah' || 
                             !KATEGORI_BARANG.includes(existing.kategori as any);
                             
           if (needsUpdate) {

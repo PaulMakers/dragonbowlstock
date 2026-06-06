@@ -12,7 +12,7 @@ export const KATEGORI_BARANG = [
   'Dapur/Kitchen',
   'Beverage',
   'Kulkas/Bagian Depan',
-  'Cup/wadah',
+  'Packaging/Cup',
   'Lain-Lain'
 ] as const;
 
