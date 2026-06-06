@@ -2,9 +2,8 @@ export const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwQeZ7nJ
 export const LOGO_URL = 'https://i.ibb.co.com/0R3MsqSp/Logo-Dragonbowl-removebg-preview.png';
 
 export const STATUS_OPTIONS = [
-  'Belum Dicek',
   'Habis',
-  'Sedang Dibeli',
+  'Tersedia',
   'Sudah Tersedia'
 ] as const;
 
