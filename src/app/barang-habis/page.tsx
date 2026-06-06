@@ -165,7 +165,7 @@ export default function BarangHabisPage() {
                     <div className="space-y-2">
                       <Label className="flex items-center gap-2"><Tag className="h-3 w-3" /> Pilih Kategori</Label>
                       <Select value={entry.kategori} onValueChange={(v) => updateEntry(index, 'kategori', v)}>
-                        <SelectTrigger className="h-11 rounded-xl">
+                        <SelectTrigger className="h-11 rounded-xl" side="bottom">
                           <SelectValue placeholder="Pilih Kategori" />
                         </SelectTrigger>
                         <SelectContent side="bottom" position="popper">
@@ -183,7 +183,7 @@ export default function BarangHabisPage() {
                         onValueChange={(v) => updateEntry(index, 'namaBarang', v)}
                         disabled={!entry.kategori}
                       >
-                        <SelectTrigger className="h-11 rounded-xl">
+                        <SelectTrigger className="h-11 rounded-xl" side="bottom">
                           <SelectValue placeholder={entry.kategori ? "Pilih Nama Barang" : "Pilih Kategori Dulu"} />
                         </SelectTrigger>
                         <SelectContent side="bottom" position="popper">
@@ -199,7 +199,7 @@ export default function BarangHabisPage() {
                     <div className="space-y-2">
                       <Label>Status</Label>
                       <Select value={entry.status} onValueChange={(v) => updateEntry(index, 'status', v)}>
-                        <SelectTrigger className="h-11 rounded-xl">
+                        <SelectTrigger className="h-11 rounded-xl" side="bottom">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent side="bottom" position="popper">

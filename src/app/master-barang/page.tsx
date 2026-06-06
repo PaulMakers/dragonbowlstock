@@ -211,7 +211,6 @@ export default function MasterBarangPage() {
     let countAdded = 0;
     let countUpdated = 0;
     try {
-      // Petakan barang yang sudah ada berdasarkan nama (lowercase)
       const existingItemsMap = new Map();
       items.forEach(i => existingItemsMap.set(i.namaBarang?.toLowerCase(), i));
 
@@ -219,7 +218,6 @@ export default function MasterBarangPage() {
         const existing = existingItemsMap.get(initialItem.nama.toLowerCase());
         
         if (existing) {
-          // Periksa apakah kategori perlu diperbarui (kosong atau nama lama)
           const needsUpdate = !existing.kategori || 
                             existing.kategori === 'Cup/wadah' || 
                             !KATEGORI_BARANG.includes(existing.kategori as any);
@@ -231,11 +229,9 @@ export default function MasterBarangPage() {
               kategori: initialItem.kategori 
             });
             countUpdated++;
-            // Delay kecil agar tidak menabrak limit Google Apps Script
             await new Promise(resolve => setTimeout(resolve, 150));
           }
         } else {
-          // Jika belum ada sama sekali
           await callBackend('addMasterBarang', { 
             namaBarang: initialItem.nama, 
             kategori: initialItem.kategori 
@@ -360,7 +356,7 @@ export default function MasterBarangPage() {
                   value={formData.kategori} 
                   onValueChange={(v) => setFormData({ ...formData, kategori: v })}
                 >
-                  <SelectTrigger className="h-12 rounded-xl">
+                  <SelectTrigger className="h-12 rounded-xl" side="bottom">
                     <SelectValue placeholder="Pilih Kategori" />
                   </SelectTrigger>
                   <SelectContent side="bottom" position="popper">
