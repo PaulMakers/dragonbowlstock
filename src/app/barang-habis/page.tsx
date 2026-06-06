@@ -77,16 +77,16 @@ export default function BarangHabisPage() {
     const newEntries = [...entries];
     if (field === 'namaBarang') {
       const selectedMaster = masterItems.find(m => m.namaBarang === value);
-      newEntries[index].kategori = selectedMaster?.kategori || '';
+      newEntries[index].kategori = selectedMaster?.kategori || 'Lain-Lain';
     }
     (newEntries[index] as any)[field] = value;
     setEntries(newEntries);
   };
 
   const handleSave = async () => {
-    const validEntries = entries.filter(e => e.namaBarang && e.jumlah && e.satuan);
+    const validEntries = entries.filter(e => e.namaBarang);
     if (validEntries.length === 0) {
-      toast({ variant: 'destructive', title: 'Peringatan', description: 'Silakan isi setidaknya satu barang dengan lengkap.' });
+      toast({ variant: 'destructive', title: 'Peringatan', description: 'Silakan pilih setidaknya satu barang.' });
       return;
     }
 
@@ -114,7 +114,6 @@ export default function BarangHabisPage() {
     }
   };
 
-  // Group items by category for the dropdown
   const groupedMasterItems = masterItems.reduce((acc: any, item: any) => {
     const cat = item.kategori || 'Lain-Lain';
     if (!acc[cat]) acc[cat] = [];
@@ -137,7 +136,7 @@ export default function BarangHabisPage() {
               {date ? format(date, 'PPP', { locale: localeId }) : <span>Pilih Tanggal</span>}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="end" side="bottom">
+          <PopoverContent className="w-auto p-0" align="end" side="bottom" position="popper">
             <Calendar mode="single" selected={date} onSelect={(d) => d && setDate(d)} initialFocus />
           </PopoverContent>
         </Popover>
@@ -152,7 +151,7 @@ export default function BarangHabisPage() {
                   <div className="h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm">
                     {index + 1}
                   </div>
-                  <h3 className="text-lg font-bold">Barang Ke-{index + 1}</h3>
+                  <h3 className="text-lg font-bold">Barang {index + 1}</h3>
                 </div>
                 {entries.length > 1 && (
                   <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10" onClick={() => removeEntry(index)}>
@@ -165,12 +164,12 @@ export default function BarangHabisPage() {
                   <Label>Nama Barang</Label>
                   <Select value={entry.namaBarang} onValueChange={(v) => updateEntry(index, 'namaBarang', v)}>
                     <SelectTrigger className="h-11 rounded-xl">
-                      <SelectValue placeholder="Cari & Pilih Barang" />
+                      <SelectValue placeholder="Pilih Nama Barang" />
                     </SelectTrigger>
                     <SelectContent side="bottom" position="popper">
-                      {Object.keys(groupedMasterItems).map((cat) => (
+                      {Object.keys(groupedMasterItems).sort().map((cat) => (
                         <SelectGroup key={cat}>
-                          <SelectLabel className="text-primary font-bold bg-primary/5">{cat}</SelectLabel>
+                          <SelectLabel className="bg-primary/5 text-primary font-bold px-2 py-1.5">{cat}</SelectLabel>
                           {groupedMasterItems[cat].map((item: any) => (
                             <SelectItem key={item.id} value={item.namaBarang}>{item.namaBarang}</SelectItem>
                           ))}
@@ -178,11 +177,12 @@ export default function BarangHabisPage() {
                       ))}
                     </SelectContent>
                   </Select>
+                  {entry.kategori && <p className="text-[10px] text-primary font-semibold uppercase ml-1">Kategori: {entry.kategori}</p>}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label>Status Ketersediaan</Label>
+                    <Label>Status</Label>
                     <Select value={entry.status} onValueChange={(v) => updateEntry(index, 'status', v)}>
                       <SelectTrigger className="h-11 rounded-xl">
                         <SelectValue />
@@ -194,7 +194,7 @@ export default function BarangHabisPage() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Jumlah {entry.status === 'Tersedia' ? 'Sisa' : 'Habis'}</Label>
+                    <Label>Jumlah {entry.status === 'Tersedia' ? 'Sisa' : 'Kurang'}</Label>
                     <Input 
                       type="number" 
                       placeholder="Cth: 10" 
@@ -204,7 +204,7 @@ export default function BarangHabisPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Satuan Unit</Label>
+                    <Label>Satuan</Label>
                     <Input 
                       placeholder="Cth: Butir" 
                       className="h-11 rounded-xl"
@@ -217,7 +217,7 @@ export default function BarangHabisPage() {
                 <div className="space-y-2">
                   <Label>Catatan (Opsional)</Label>
                   <Textarea 
-                    placeholder="Contoh: Sangat mendesak" 
+                    placeholder="Contoh: Perlu dikirim segera" 
                     className="rounded-xl resize-none"
                     value={entry.catatan}
                     onChange={(e) => updateEntry(index, 'catatan', e.target.value)}
@@ -229,11 +229,11 @@ export default function BarangHabisPage() {
 
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
             <Button variant="outline" className="flex-1 h-12 border-dashed border-2 rounded-xl text-primary font-bold" onClick={addEntry}>
-              <Plus className="mr-2 h-5 w-5" /> Tambah Barang
+              <Plus className="mr-2 h-5 w-5" /> Tambah Baris
             </Button>
             <Button className="flex-1 h-12 rounded-xl primary-gradient font-bold" onClick={handleSave} disabled={saving}>
               {saving ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <CheckCircle2 className="mr-2 h-5 w-5" />}
-              Kirim Laporan
+              Simpan Laporan
             </Button>
           </div>
         </div>
@@ -243,28 +243,31 @@ export default function BarangHabisPage() {
             <div className="bg-primary/5 p-4">
               <h3 className="text-lg font-bold flex items-center gap-2">
                 <AlertCircle className="h-5 w-5 text-primary" />
-                Informasi
+                Informasi Pengisian
               </h3>
             </div>
             <CardContent className="p-6 space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Gunakan fitur ini untuk melaporkan stok harian. Jika barang <strong>masih ada</strong>, tetap input jumlah sisa agar admin tahu kapan harus restock.
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Silakan pilih barang yang ingin dilaporkan kondisinya. 
               </p>
-              <Separator />
               <div className="space-y-3">
                 <div className="flex gap-3 text-sm">
                   <div className="h-5 w-5 rounded bg-green-500/10 text-green-500 flex items-center justify-center font-bold">1</div>
-                  <span>Pilih barang dari kategori yang sesuai.</span>
+                  <span>Pilih barang (Dikelompokkan per kategori).</span>
                 </div>
                 <div className="flex gap-3 text-sm">
                   <div className="h-5 w-5 rounded bg-green-500/10 text-green-500 flex items-center justify-center font-bold">2</div>
-                  <span>Pilih status Masih Ada/Habis.</span>
+                  <span>Pilih Status <b>Sudah Habis</b> atau <b>Masih Ada</b>.</span>
                 </div>
                 <div className="flex gap-3 text-sm">
                   <div className="h-5 w-5 rounded bg-green-500/10 text-green-500 flex items-center justify-center font-bold">3</div>
-                  <span>Isi jumlah dan satuan standar.</span>
+                  <span>Input sisa/kurang stok beserta satuannya.</span>
                 </div>
               </div>
+              <Separator />
+              <p className="text-xs text-muted-foreground italic">
+                Data ini akan otomatis masuk ke menu Prepare Barang untuk dicek oleh Supervisor.
+              </p>
             </CardContent>
           </Card>
         </div>

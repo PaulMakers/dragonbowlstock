@@ -16,7 +16,6 @@ import {
   Loader2,
   Package,
   Database,
-  AlertCircle,
   Tag
 } from 'lucide-react';
 import {
@@ -31,6 +30,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { KATEGORI_BARANG } from '@/lib/constants';
 
 const INITIAL_ITEMS = [
+  // Dapur/Kitchen
   { nama: 'mie kuning', kategori: 'Dapur/Kitchen' },
   { nama: 'mie warna warni', kategori: 'Dapur/Kitchen' },
   { nama: 'ayam kecap', kategori: 'Dapur/Kitchen' },
@@ -59,6 +59,7 @@ const INITIAL_ITEMS = [
   { nama: 'cekerr mercon prepare', kategori: 'Dapur/Kitchen' },
   { nama: 'platter', kategori: 'Dapur/Kitchen' },
   { nama: 'kentang', kategori: 'Dapur/Kitchen' },
+  // Sayuran
   { nama: 'tomat', kategori: 'Sayuran' },
   { nama: 'wortel', kategori: 'Sayuran' },
   { nama: 'timun', kategori: 'Sayuran' },
@@ -66,6 +67,7 @@ const INITIAL_ITEMS = [
   { nama: 'pakcoy', kategori: 'Sayuran' },
   { nama: 'selada', kategori: 'Sayuran' },
   { nama: 'daun bawang', kategori: 'Sayuran' },
+  // Bumbu/DLL
   { nama: 'kuah kaldu', kategori: 'Bumbu/DLL' },
   { nama: 'totole', kategori: 'Bumbu/DLL' },
   { nama: 'garam', kategori: 'Bumbu/DLL' },
@@ -82,6 +84,7 @@ const INITIAL_ITEMS = [
   { nama: 'saus tomat', kategori: 'Bumbu/DLL' },
   { nama: 'mayonaise', kategori: 'Bumbu/DLL' },
   { nama: 'telur biasa', kategori: 'Bumbu/DLL' },
+  // Beverage
   { nama: 'Kolang Kaling', kategori: 'Beverage' },
   { nama: 'Creamer', kategori: 'Beverage' },
   { nama: 'Sirsak', kategori: 'Beverage' },
@@ -125,6 +128,7 @@ const INITIAL_ITEMS = [
   { nama: 'Selasih', kategori: 'Beverage' },
   { nama: 'Jus Blackberry', kategori: 'Beverage' },
   { nama: 'Thai Tea', kategori: 'Beverage' },
+  // Kulkas/Bagian Depan
   { nama: 'Sosis Kanzler', kategori: 'Kulkas/Bagian Depan' },
   { nama: 'Air Mineral Kecil', kategori: 'Kulkas/Bagian Depan' },
   { nama: 'Air Mineral Sedang', kategori: 'Kulkas/Bagian Depan' },
@@ -132,6 +136,7 @@ const INITIAL_ITEMS = [
   { nama: 'Air Kelapa', kategori: 'Kulkas/Bagian Depan' },
   { nama: 'Susu Cimory', kategori: 'Kulkas/Bagian Depan' },
   { nama: 'Cilok', kategori: 'Kulkas/Bagian Depan' },
+  // Packaging/Cup
   { nama: 'Bowl Besar', kategori: 'Packaging/Cup' },
   { nama: 'Bowl Sedang', kategori: 'Packaging/Cup' },
   { nama: 'Bowl Kecil', kategori: 'Packaging/Cup' },
@@ -140,6 +145,7 @@ const INITIAL_ITEMS = [
   { nama: 'Tempat Cilok', kategori: 'Packaging/Cup' },
   { nama: 'Gelas Teh Es', kategori: 'Packaging/Cup' },
   { nama: 'Tempat Platter Combo Thai Tea', kategori: 'Packaging/Cup' },
+  // Lain-Lain
   { nama: 'Sumpit', kategori: 'Lain-Lain' },
   { nama: 'Sendok Plastik', kategori: 'Lain-Lain' },
   { nama: 'Sedotan', kategori: 'Lain-Lain' },
