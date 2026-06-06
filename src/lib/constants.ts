@@ -8,4 +8,15 @@ export const STATUS_OPTIONS = [
   'Sudah Tersedia'
 ] as const;
 
+export const KATEGORI_BARANG = [
+  'Dapur/Kitchen',
+  'Beverage',
+  'Kulkas/Bagian Depan',
+  'Packaging/Cup',
+  'Bumbu/DLL',
+  'Sayuran',
+  'Lain-Lain'
+] as const;
+
 export type StatusType = (typeof STATUS_OPTIONS)[number];
+export type KategoriType = (typeof KATEGORI_BARANG)[number];

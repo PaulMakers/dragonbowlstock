@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react';
@@ -17,7 +16,8 @@ import {
   Loader2,
   Package,
   Database,
-  AlertCircle
+  AlertCircle,
+  Tag
 } from 'lucide-react';
 import {
   Dialog,
@@ -27,34 +27,123 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { KATEGORI_BARANG } from '@/lib/constants';
 
 const INITIAL_ITEMS = [
-  // Dapur/Kitchen - Bakmie & Misua
-  'mie kuning', 'mie warna warni', 'ayam kecap', 'bawang putih goreng', 'pangsit', 'bakso goreng', 'bumbu mie',
-  'mie misua', 'ayam misua', 'jamur', 'telur omega',
-  // Ayam Katsu & Lainnya
-  'ayam katsu prepare', 'Ayam sambal matah', 'sambal matah', 'daun jeruk', 'bawang merah', 'sereh', 'cabe',
-  'ayam karage', 'ayam woku', 'ayam rica', 'pempek', 'kuah cuko', 'cireng', 
-  'Tahu pong', 'cekerr mercon prepare', 'platter', 'kentang',
-  // Sayuran
-  'tomat', 'wortel', 'timun', 'sawi hijau', 'pakcoy', 'selada', 'daun bawang',
-  // DLL / Bumbu
-  'kuah kaldu', 'totole', 'garam', 'micin', 'lada', 'beras', 'minyak goreng', 'sambal', 'chili oil',
-  'roti tawar', 'selai roti', 'margarin', 'kecap', 'saus tomat', 'mayonaise', 'telur biasa',
-  // Minuman/Beverage
-  'Kolang Kaling', 'Creamer', 'Sirsak', 'Kelapa Kopyor', 'Kuah Jahe', 'Jelly Hijau', 'Ketan Hitam', 'Anggur', 
-  'Strawberry', 'Semangka', 'Semangka Kuning', 'Tapai', 'Melon', 'Nanas', 'Keju', 'Sirup Cocopandan', 'Mutiara', 
-  'Teh', 'Cendol', 'Rumput laut', 'Kacang Hijau', 'Ronde Kecil', 'Ronde Besar', 'Roti Angsle', 'Alpukat', 
-  'Susu Kental Manis', 'Nata de Coco', 'Simple Sirup ( Air Gula )', 'Mangga', 'Jeruk', 'Cincau', 'Boba', 'Nangka', 
-  'Kelapa Biasa ( Frozen )', 'Es Batu', 'Jus Strawberry', 'Jus Alpukat', 'Jus Mangga', 'Ketan Putih', 'Kacang Tanah', 
-  'Selasih', 'Jus Blackberry', 'Thai Tea',
-  // Bagian Depan/Kulkas
-  'Sosis Kanzler', 'Air Mineral Kecil', 'Air Mineral Sedang', 'Air Mineral Besar', 'Air Kelapa', 'Susu Cimory', 'Cilok',
-  // Cup/Tempat Makanan
-  'Bowl Besar', 'Bowl Sedang', 'Bowl Kecil', 'Tempat Es ( Dine In )', 'Tempat Es ( Take Away )', 'Tempat Cilok', 
-  'Gelas Teh Es', 'Tempat Platter Combo Thai Tea',
-  // Lain-Lain
-  'Sumpit', 'Sendok Plastik', 'Sedotan', 'Plastik Kecil Untuk Stock Adonan Es'
+  { nama: 'mie kuning', kategori: 'Dapur/Kitchen' },
+  { nama: 'mie warna warni', kategori: 'Dapur/Kitchen' },
+  { nama: 'ayam kecap', kategori: 'Dapur/Kitchen' },
+  { nama: 'bawang putih goreng', kategori: 'Dapur/Kitchen' },
+  { nama: 'pangsit', kategori: 'Dapur/Kitchen' },
+  { nama: 'bakso goreng', kategori: 'Dapur/Kitchen' },
+  { nama: 'bumbu mie', kategori: 'Dapur/Kitchen' },
+  { nama: 'mie misua', kategori: 'Dapur/Kitchen' },
+  { nama: 'ayam misua', kategori: 'Dapur/Kitchen' },
+  { nama: 'jamur', kategori: 'Dapur/Kitchen' },
+  { nama: 'telur omega', kategori: 'Dapur/Kitchen' },
+  { nama: 'ayam katsu prepare', kategori: 'Dapur/Kitchen' },
+  { nama: 'Ayam sambal matah', kategori: 'Dapur/Kitchen' },
+  { nama: 'sambal matah', kategori: 'Dapur/Kitchen' },
+  { nama: 'daun jeruk', kategori: 'Dapur/Kitchen' },
+  { nama: 'bawang merah', kategori: 'Dapur/Kitchen' },
+  { nama: 'sereh', kategori: 'Dapur/Kitchen' },
+  { nama: 'cabe', kategori: 'Dapur/Kitchen' },
+  { nama: 'ayam karage', kategori: 'Dapur/Kitchen' },
+  { nama: 'ayam woku', kategori: 'Dapur/Kitchen' },
+  { nama: 'ayam rica', kategori: 'Dapur/Kitchen' },
+  { nama: 'pempek', kategori: 'Dapur/Kitchen' },
+  { nama: 'kuah cuko', kategori: 'Dapur/Kitchen' },
+  { nama: 'cireng', kategori: 'Dapur/Kitchen' },
+  { nama: 'Tahu pong', kategori: 'Dapur/Kitchen' },
+  { nama: 'cekerr mercon prepare', kategori: 'Dapur/Kitchen' },
+  { nama: 'platter', kategori: 'Dapur/Kitchen' },
+  { nama: 'kentang', kategori: 'Dapur/Kitchen' },
+  { nama: 'tomat', kategori: 'Sayuran' },
+  { nama: 'wortel', kategori: 'Sayuran' },
+  { nama: 'timun', kategori: 'Sayuran' },
+  { nama: 'sawi hijau', kategori: 'Sayuran' },
+  { nama: 'pakcoy', kategori: 'Sayuran' },
+  { nama: 'selada', kategori: 'Sayuran' },
+  { nama: 'daun bawang', kategori: 'Sayuran' },
+  { nama: 'kuah kaldu', kategori: 'Bumbu/DLL' },
+  { nama: 'totole', kategori: 'Bumbu/DLL' },
+  { nama: 'garam', kategori: 'Bumbu/DLL' },
+  { nama: 'micin', kategori: 'Bumbu/DLL' },
+  { nama: 'lada', kategori: 'Bumbu/DLL' },
+  { nama: 'beras', kategori: 'Bumbu/DLL' },
+  { nama: 'minyak goreng', kategori: 'Bumbu/DLL' },
+  { nama: 'sambal', kategori: 'Bumbu/DLL' },
+  { nama: 'chili oil', kategori: 'Bumbu/DLL' },
+  { nama: 'roti tawar', kategori: 'Bumbu/DLL' },
+  { nama: 'selai roti', kategori: 'Bumbu/DLL' },
+  { nama: 'margarin', kategori: 'Bumbu/DLL' },
+  { nama: 'kecap', kategori: 'Bumbu/DLL' },
+  { nama: 'saus tomat', kategori: 'Bumbu/DLL' },
+  { nama: 'mayonaise', kategori: 'Bumbu/DLL' },
+  { nama: 'telur biasa', kategori: 'Bumbu/DLL' },
+  { nama: 'Kolang Kaling', kategori: 'Beverage' },
+  { nama: 'Creamer', kategori: 'Beverage' },
+  { nama: 'Sirsak', kategori: 'Beverage' },
+  { nama: 'Kelapa Kopyor', kategori: 'Beverage' },
+  { nama: 'Kuah Jahe', kategori: 'Beverage' },
+  { nama: 'Jelly Hijau', kategori: 'Beverage' },
+  { nama: 'Ketan Hitam', kategori: 'Beverage' },
+  { nama: 'Anggur', kategori: 'Beverage' },
+  { nama: 'Strawberry', kategori: 'Beverage' },
+  { nama: 'Semangka', kategori: 'Beverage' },
+  { nama: 'Semangka Kuning', kategori: 'Beverage' },
+  { nama: 'Tapai', kategori: 'Beverage' },
+  { nama: 'Melon', kategori: 'Beverage' },
+  { nama: 'Nanas', kategori: 'Beverage' },
+  { nama: 'Keju', kategori: 'Beverage' },
+  { nama: 'Sirup Cocopandan', kategori: 'Beverage' },
+  { nama: 'Mutiara', kategori: 'Beverage' },
+  { nama: 'Teh', kategori: 'Beverage' },
+  { nama: 'Cendol', kategori: 'Beverage' },
+  { nama: 'Rumput laut', kategori: 'Beverage' },
+  { nama: 'Kacang Hijau', kategori: 'Beverage' },
+  { nama: 'Ronde Kecil', kategori: 'Beverage' },
+  { nama: 'Ronde Besar', kategori: 'Beverage' },
+  { nama: 'Roti Angsle', kategori: 'Beverage' },
+  { nama: 'Alpukat', kategori: 'Beverage' },
+  { nama: 'Susu Kental Manis', kategori: 'Beverage' },
+  { nama: 'Nata de Coco', kategori: 'Beverage' },
+  { nama: 'Simple Sirup ( Air Gula )', kategori: 'Beverage' },
+  { nama: 'Mangga', kategori: 'Beverage' },
+  { nama: 'Jeruk', kategori: 'Beverage' },
+  { nama: 'Cincau', kategori: 'Beverage' },
+  { nama: 'Boba', kategori: 'Beverage' },
+  { nama: 'Nangka', kategori: 'Beverage' },
+  { nama: 'Kelapa Biasa ( Frozen )', kategori: 'Beverage' },
+  { nama: 'Es Batu', kategori: 'Beverage' },
+  { nama: 'Jus Strawberry', kategori: 'Beverage' },
+  { nama: 'Jus Alpukat', kategori: 'Beverage' },
+  { nama: 'Jus Mangga', kategori: 'Beverage' },
+  { nama: 'Ketan Putih', kategori: 'Beverage' },
+  { nama: 'Kacang Tanah', kategori: 'Beverage' },
+  { nama: 'Selasih', kategori: 'Beverage' },
+  { nama: 'Jus Blackberry', kategori: 'Beverage' },
+  { nama: 'Thai Tea', kategori: 'Beverage' },
+  { nama: 'Sosis Kanzler', kategori: 'Kulkas/Bagian Depan' },
+  { nama: 'Air Mineral Kecil', kategori: 'Kulkas/Bagian Depan' },
+  { nama: 'Air Mineral Sedang', kategori: 'Kulkas/Bagian Depan' },
+  { nama: 'Air Mineral Besar', kategori: 'Kulkas/Bagian Depan' },
+  { nama: 'Air Kelapa', kategori: 'Kulkas/Bagian Depan' },
+  { nama: 'Susu Cimory', kategori: 'Kulkas/Bagian Depan' },
+  { nama: 'Cilok', kategori: 'Kulkas/Bagian Depan' },
+  { nama: 'Bowl Besar', kategori: 'Packaging/Cup' },
+  { nama: 'Bowl Sedang', kategori: 'Packaging/Cup' },
+  { nama: 'Bowl Kecil', kategori: 'Packaging/Cup' },
+  { nama: 'Tempat Es ( Dine In )', kategori: 'Packaging/Cup' },
+  { nama: 'Tempat Es ( Take Away )', kategori: 'Packaging/Cup' },
+  { nama: 'Tempat Cilok', kategori: 'Packaging/Cup' },
+  { nama: 'Gelas Teh Es', kategori: 'Packaging/Cup' },
+  { nama: 'Tempat Platter Combo Thai Tea', kategori: 'Packaging/Cup' },
+  { nama: 'Sumpit', kategori: 'Lain-Lain' },
+  { nama: 'Sendok Plastik', kategori: 'Lain-Lain' },
+  { nama: 'Sedotan', kategori: 'Lain-Lain' },
+  { nama: 'Plastik Kecil Untuk Stock Adonan Es', kategori: 'Lain-Lain' }
 ];
 
 export default function MasterBarangPage() {
@@ -64,7 +153,7 @@ export default function MasterBarangPage() {
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
-  const [formData, setFormData] = useState({ namaBarang: '' });
+  const [formData, setFormData] = useState({ namaBarang: '', kategori: 'Dapur/Kitchen' });
   const [submitting, setSubmitting] = useState(false);
   const [seeding, setSeeding] = useState(false);
 
@@ -87,13 +176,13 @@ export default function MasterBarangPage() {
 
   const handleOpenAdd = () => {
     setEditingItem(null);
-    setFormData({ namaBarang: '' });
+    setFormData({ namaBarang: '', kategori: 'Dapur/Kitchen' });
     setIsModalOpen(true);
   };
 
   const handleOpenEdit = (item: any) => {
     setEditingItem(item);
-    setFormData({ namaBarang: item.namaBarang });
+    setFormData({ namaBarang: item.namaBarang, kategori: item.kategori || 'Dapur/Kitchen' });
     setIsModalOpen(true);
   };
 
@@ -135,13 +224,13 @@ export default function MasterBarangPage() {
   };
 
   const handleSeedData = async () => {
-    if (!confirm('Apakah Anda ingin memasukkan seluruh daftar awal barang (Kitchen, Beverage, dll) secara otomatis?')) return;
+    if (!confirm('Apakah Anda ingin memasukkan seluruh daftar awal barang secara otomatis?')) return;
     
     setSeeding(true);
     let count = 0;
     try {
       const existingNames = new Set(items.map(i => i.namaBarang?.toLowerCase() || ''));
-      const itemsToSeed = INITIAL_ITEMS.filter(name => !existingNames.has(name.toLowerCase()));
+      const itemsToSeed = INITIAL_ITEMS.filter(item => !existingNames.has(item.nama.toLowerCase()));
 
       if (itemsToSeed.length === 0) {
         toast({ title: 'Info', description: 'Semua barang sudah ada di sistem.' });
@@ -149,34 +238,29 @@ export default function MasterBarangPage() {
         return;
       }
 
-      for (const name of itemsToSeed) {
+      for (const item of itemsToSeed) {
         try {
-          await callBackend('addMasterBarang', { namaBarang: name });
+          await callBackend('addMasterBarang', { namaBarang: item.nama, kategori: item.kategori });
           count++;
-          // Tambahkan delay 200ms agar Google Apps Script tidak rate-limited (Failed to fetch)
           await new Promise(resolve => setTimeout(resolve, 200));
         } catch (e) {
-          console.error(`Gagal memasukkan ${name}:`, e);
+          console.error(`Gagal memasukkan ${item.nama}:`, e);
         }
       }
       
-      toast({ 
-        title: 'Selesai', 
-        description: `${count} barang baru berhasil ditambahkan.` 
-      });
+      toast({ title: 'Selesai', description: `${count} barang baru berhasil ditambahkan.` });
       fetchItems();
     } catch (err: any) {
-      toast({ 
-        variant: 'destructive', 
-        title: 'Gagal Seed Data', 
-        description: err.message || 'Terjadi kesalahan saat sinkronisasi data.' 
-      });
+      toast({ variant: 'destructive', title: 'Gagal', description: 'Gagal sinkronisasi data.' });
     } finally {
       setSeeding(false);
     }
   };
 
-  const filteredItems = items.filter(i => i.namaBarang?.toLowerCase().includes(search.toLowerCase()));
+  const filteredItems = items.filter(i => 
+    i.namaBarang?.toLowerCase().includes(search.toLowerCase()) ||
+    i.kategori?.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <DashboardLayout>
@@ -186,10 +270,10 @@ export default function MasterBarangPage() {
           <p className="text-muted-foreground">Kelola daftar referensi barang untuk seluruh outlet.</p>
         </div>
         <div className="flex gap-2">
-          {items.length < INITIAL_ITEMS.length && !loading && (
+          {!loading && (
              <Button onClick={handleSeedData} variant="outline" className="h-12 px-6 rounded-xl border-primary/40 text-primary hover:bg-primary/5" disabled={seeding}>
               {seeding ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Database className="mr-2 h-5 w-5" />}
-              {seeding ? 'Memproses...' : 'Sinkronisasi Data Awal'}
+              Sinkron Data Awal
             </Button>
           )}
           <Button onClick={handleOpenAdd} className="h-12 px-6 rounded-xl primary-gradient font-semibold">
@@ -203,7 +287,7 @@ export default function MasterBarangPage() {
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input 
-              placeholder="Cari barang..." 
+              placeholder="Cari nama atau kategori..." 
               className="pl-10 h-11 rounded-xl bg-background/50"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -226,14 +310,16 @@ export default function MasterBarangPage() {
                     </div>
                     <div>
                       <p className="font-bold text-lg">{item.namaBarang}</p>
-                      <p className="text-xs text-muted-foreground">ID: {item.id?.substring(0, 8)}...</p>
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Tag className="h-3 w-3" /> {item.kategori || 'Tanpa Kategori'}
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" onClick={() => handleOpenEdit(item)} className="h-10 w-10 rounded-full hover:bg-primary/10 hover:text-primary">
+                    <Button variant="ghost" size="icon" onClick={() => handleOpenEdit(item)} className="h-10 w-10 rounded-full">
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(item)} className="h-10 w-10 rounded-full hover:bg-destructive/10 hover:text-destructive">
+                    <Button variant="ghost" size="icon" onClick={() => handleDelete(item)} className="h-10 w-10 rounded-full text-destructive">
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
@@ -244,13 +330,6 @@ export default function MasterBarangPage() {
             <div className="p-20 text-center">
               <Package className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
               <h3 className="font-headline text-xl font-bold">Tidak ada barang</h3>
-              <p className="text-muted-foreground mt-2">Daftar master barang masih kosong atau tidak ditemukan.</p>
-              {items.length === 0 && (
-                <div className="mt-6 p-4 bg-primary/5 rounded-xl border border-primary/20 max-w-sm mx-auto">
-                  <AlertCircle className="h-6 w-6 text-primary mx-auto mb-2" />
-                  <p className="text-sm text-primary font-medium">Klik "Sinkronisasi Data Awal" untuk mengisi daftar barang secara otomatis.</p>
-                </div>
-              )}
             </div>
           )}
         </CardContent>
@@ -261,9 +340,7 @@ export default function MasterBarangPage() {
           <form onSubmit={handleSubmit}>
             <DialogHeader>
               <DialogTitle className="text-2xl font-headline">{editingItem ? 'Edit Barang' : 'Tambah Barang'}</DialogTitle>
-              <DialogDescription>
-                Masukkan nama barang baru untuk ditambahkan ke master.
-              </DialogDescription>
+              <DialogDescription>Masukkan detail barang untuk master data.</DialogDescription>
             </DialogHeader>
             <div className="py-6 space-y-4">
               <div className="space-y-2">
@@ -275,14 +352,29 @@ export default function MasterBarangPage() {
                   onChange={(e) => setFormData({ ...formData, namaBarang: e.target.value })}
                   required
                   className="h-12 rounded-xl"
-                  autoFocus
                 />
+              </div>
+              <div className="space-y-2">
+                <Label>Kategori</Label>
+                <Select 
+                  value={formData.kategori} 
+                  onValueChange={(v) => setFormData({ ...formData, kategori: v })}
+                >
+                  <SelectTrigger className="h-12 rounded-xl">
+                    <SelectValue placeholder="Pilih Kategori" />
+                  </SelectTrigger>
+                  <SelectContent side="bottom" position="popper">
+                    {KATEGORI_BARANG.map(cat => (
+                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} className="h-12 px-6 rounded-xl">Batal</Button>
               <Button type="submit" className="h-12 px-8 rounded-xl primary-gradient font-bold" disabled={submitting}>
-                {submitting ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
+                {submitting && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
                 Simpan
               </Button>
             </DialogFooter>
