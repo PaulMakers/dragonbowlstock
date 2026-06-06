@@ -136,7 +136,7 @@ export default function BarangHabisPage() {
               {date ? format(date, 'PPP', { locale: localeId }) : <span>Pilih Tanggal</span>}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="end" side="bottom" position="popper">
+          <PopoverContent className="w-auto p-0" align="end" side="bottom">
             <Calendar mode="single" selected={date} onSelect={(d) => d && setDate(d)} initialFocus />
           </PopoverContent>
         </Popover>
@@ -188,8 +188,8 @@ export default function BarangHabisPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent side="bottom" position="popper">
-                        <SelectItem value="Habis">Stock Sudah Habis</SelectItem>
-                        <SelectItem value="Tersedia">Stock Masih Ada</SelectItem>
+                        <SelectItem value="Habis">Stok Sudah Habis</SelectItem>
+                        <SelectItem value="Tersedia">Stok Masih Ada</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -257,11 +257,11 @@ export default function BarangHabisPage() {
                 </div>
                 <div className="flex gap-3 text-sm">
                   <div className="h-5 w-5 rounded bg-green-500/10 text-green-500 flex items-center justify-center font-bold">2</div>
-                  <span>Pilih Status <b>Sudah Habis</b> atau <b>Masih Ada</b>.</span>
+                  <span>Pilih Status <b>Stok Masih Ada</b> atau <b>Stok Sudah Habis</b>.</span>
                 </div>
                 <div className="flex gap-3 text-sm">
                   <div className="h-5 w-5 rounded bg-green-500/10 text-green-500 flex items-center justify-center font-bold">3</div>
-                  <span>Input sisa/kurang stok beserta satuannya.</span>
+                  <span>Input jumlah stok (sisa/kurang) beserta satuannya.</span>
                 </div>
               </div>
               <Separator />
