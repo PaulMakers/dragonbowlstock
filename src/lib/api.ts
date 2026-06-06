@@ -1,4 +1,3 @@
-
 import { APPS_SCRIPT_URL } from './constants';
 
 export async function callBackend(action: string, payload: any = {}) {
@@ -7,12 +6,20 @@ export async function callBackend(action: string, payload: any = {}) {
     const url = new URL(APPS_SCRIPT_URL);
     url.searchParams.append('action', action);
 
+    // Menggunakan mode: 'cors' dan mengabaikan preflight jika memungkinkan dengan text/plain
     const response = await fetch(url.toString(), {
       method: 'POST',
+      mode: 'cors',
       headers: {
         'Content-Type': 'text/plain',
       },
       body: JSON.stringify(payload),
+    }).catch(err => {
+      // Menangkap error network seperti Failed to fetch
+      if (err.message === 'Failed to fetch') {
+        throw new Error('Gagal terhubung ke Google Script. Pastikan Anda memiliki koneksi internet dan skrip sudah di-deploy sebagai "Anyone".');
+      }
+      throw err;
     });
 
     if (!response.ok) {
@@ -29,9 +36,9 @@ export async function callBackend(action: string, payload: any = {}) {
     }
 
     if (data.error) {
-      // Improved error detection for missing sheets in Apps Script
+      // Penanganan khusus untuk error yang sering muncul dari Apps Script
       if (data.error.includes('tidak ditemukan') || data.error.includes("reading 'appendRow'") || data.error.includes('null')) {
-        throw new Error(`Terjadi masalah pada Database (Sheet). Pastikan Anda sudah mengupdate kode di Google Apps Script dan klik 'Inisialisasi Admin' di halaman login.`);
+        throw new Error(`Masalah database (Sheet). Pastikan Sheet sudah diinisialisasi melalui tombol Admin.`);
       }
       throw new Error(data.error);
     }
