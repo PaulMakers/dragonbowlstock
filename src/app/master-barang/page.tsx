@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react';
@@ -230,31 +231,46 @@ export default function MasterBarangPage() {
   };
 
   const handleSeedData = async () => {
-    if (!confirm('Apakah Anda ingin memasukkan seluruh daftar awal barang secara otomatis?')) return;
+    if (!confirm('Apakah Anda ingin menyinkronkan daftar barang? Ini akan mengisi kategori yang kosong untuk barang yang sudah ada dan menambah barang yang belum ada.')) return;
     
     setSeeding(true);
-    let count = 0;
+    let countAdded = 0;
+    let countUpdated = 0;
     try {
-      const existingNames = new Set(items.map(i => i.namaBarang?.toLowerCase() || ''));
-      const itemsToSeed = INITIAL_ITEMS.filter(item => !existingNames.has(item.nama.toLowerCase()));
+      // Petakan barang yang sudah ada berdasarkan nama (lowercase)
+      const existingItemsMap = new Map();
+      items.forEach(i => existingItemsMap.set(i.namaBarang?.toLowerCase(), i));
 
-      if (itemsToSeed.length === 0) {
-        toast({ title: 'Info', description: 'Semua barang sudah ada di sistem.' });
-        setSeeding(false);
-        return;
-      }
-
-      for (const item of itemsToSeed) {
-        try {
-          await callBackend('addMasterBarang', { namaBarang: item.nama, kategori: item.kategori });
-          count++;
-          await new Promise(resolve => setTimeout(resolve, 200));
-        } catch (e) {
-          console.error(`Gagal memasukkan ${item.nama}:`, e);
+      for (const initialItem of INITIAL_ITEMS) {
+        const existing = existingItemsMap.get(initialItem.nama.toLowerCase());
+        
+        if (existing) {
+          // Jika sudah ada tapi kategori tidak valid (misal berisi tanggal atau kosong)
+          const isValidCategory = KATEGORI_BARANG.includes(existing.kategori as any);
+          if (!isValidCategory || !existing.kategori) {
+            await callBackend('updateMasterBarang', { 
+              id: existing.id, 
+              namaBarang: initialItem.nama, 
+              kategori: initialItem.kategori 
+            });
+            countUpdated++;
+            await new Promise(resolve => setTimeout(resolve, 150));
+          }
+        } else {
+          // Jika belum ada sama sekali
+          await callBackend('addMasterBarang', { 
+            namaBarang: initialItem.nama, 
+            kategori: initialItem.kategori 
+          });
+          countAdded++;
+          await new Promise(resolve => setTimeout(resolve, 150));
         }
       }
       
-      toast({ title: 'Selesai', description: `${count} barang baru berhasil ditambahkan.` });
+      toast({ 
+        title: 'Selesai', 
+        description: `${countAdded} barang baru ditambah, ${countUpdated} kategori barang diperbarui.` 
+      });
       fetchItems();
     } catch (err: any) {
       toast({ variant: 'destructive', title: 'Gagal', description: 'Gagal sinkronisasi data.' });
