@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react';
@@ -60,31 +59,6 @@ const INITIAL_ITEMS = [
   { nama: 'cekerr mercon prepare', kategori: 'Dapur/Kitchen' },
   { nama: 'platter', kategori: 'Dapur/Kitchen' },
   { nama: 'kentang', kategori: 'Dapur/Kitchen' },
-  // Sayuran
-  { nama: 'tomat', kategori: 'Sayuran' },
-  { nama: 'wortel', kategori: 'Sayuran' },
-  { nama: 'timun', kategori: 'Sayuran' },
-  { nama: 'sawi hijau', kategori: 'Sayuran' },
-  { nama: 'pakcoy', kategori: 'Sayuran' },
-  { nama: 'selada', kategori: 'Sayuran' },
-  { nama: 'daun bawang', kategori: 'Sayuran' },
-  // Bumbu/DLL
-  { nama: 'kuah kaldu', kategori: 'Bumbu/DLL' },
-  { nama: 'totole', kategori: 'Bumbu/DLL' },
-  { nama: 'garam', kategori: 'Bumbu/DLL' },
-  { nama: 'micin', kategori: 'Bumbu/DLL' },
-  { nama: 'lada', kategori: 'Bumbu/DLL' },
-  { nama: 'beras', kategori: 'Bumbu/DLL' },
-  { nama: 'minyak goreng', kategori: 'Bumbu/DLL' },
-  { nama: 'sambal', kategori: 'Bumbu/DLL' },
-  { nama: 'chili oil', kategori: 'Bumbu/DLL' },
-  { nama: 'roti tawar', kategori: 'Bumbu/DLL' },
-  { nama: 'selai roti', kategori: 'Bumbu/DLL' },
-  { nama: 'margarin', kategori: 'Bumbu/DLL' },
-  { nama: 'kecap', kategori: 'Bumbu/DLL' },
-  { nama: 'saus tomat', kategori: 'Bumbu/DLL' },
-  { nama: 'mayonaise', kategori: 'Bumbu/DLL' },
-  { nama: 'telur biasa', kategori: 'Bumbu/DLL' },
   // Beverage
   { nama: 'Kolang Kaling', kategori: 'Beverage' },
   { nama: 'Creamer', kategori: 'Beverage' },
@@ -137,15 +111,15 @@ const INITIAL_ITEMS = [
   { nama: 'Air Kelapa', kategori: 'Kulkas/Bagian Depan' },
   { nama: 'Susu Cimory', kategori: 'Kulkas/Bagian Depan' },
   { nama: 'Cilok', kategori: 'Kulkas/Bagian Depan' },
-  // Packaging/Cup
-  { nama: 'Bowl Besar', kategori: 'Packaging/Cup' },
-  { nama: 'Bowl Sedang', kategori: 'Packaging/Cup' },
-  { nama: 'Bowl Kecil', kategori: 'Packaging/Cup' },
-  { nama: 'Tempat Es ( Dine In )', kategori: 'Packaging/Cup' },
-  { nama: 'Tempat Es ( Take Away )', kategori: 'Packaging/Cup' },
-  { nama: 'Tempat Cilok', kategori: 'Packaging/Cup' },
-  { nama: 'Gelas Teh Es', kategori: 'Packaging/Cup' },
-  { nama: 'Tempat Platter Combo Thai Tea', kategori: 'Packaging/Cup' },
+  // Cup/wadah
+  { nama: 'Bowl Besar', kategori: 'Cup/wadah' },
+  { nama: 'Bowl Sedang', kategori: 'Cup/wadah' },
+  { nama: 'Bowl Kecil', kategori: 'Cup/wadah' },
+  { nama: 'Tempat Es ( Dine In )', kategori: 'Cup/wadah' },
+  { nama: 'Tempat Es ( Take Away )', kategori: 'Cup/wadah' },
+  { nama: 'Tempat Cilok', kategori: 'Cup/wadah' },
+  { nama: 'Gelas Teh Es', kategori: 'Cup/wadah' },
+  { nama: 'Tempat Platter Combo Thai Tea', kategori: 'Cup/wadah' },
   // Lain-Lain
   { nama: 'Sumpit', kategori: 'Lain-Lain' },
   { nama: 'Sendok Plastik', kategori: 'Lain-Lain' },
@@ -245,15 +219,19 @@ export default function MasterBarangPage() {
         const existing = existingItemsMap.get(initialItem.nama.toLowerCase());
         
         if (existing) {
-          // Jika sudah ada tapi kategori tidak valid (misal berisi tanggal atau kosong)
-          const isValidCategory = KATEGORI_BARANG.includes(existing.kategori as any);
-          if (!isValidCategory || !existing.kategori) {
+          // Periksa apakah kategori perlu diperbarui (kosong atau nama lama)
+          const needsUpdate = !existing.kategori || 
+                            existing.kategori === 'Packaging/Cup' || 
+                            !KATEGORI_BARANG.includes(existing.kategori as any);
+                            
+          if (needsUpdate) {
             await callBackend('updateMasterBarang', { 
               id: existing.id, 
               namaBarang: initialItem.nama, 
               kategori: initialItem.kategori 
             });
             countUpdated++;
+            // Delay kecil agar tidak menabrak limit Google Apps Script
             await new Promise(resolve => setTimeout(resolve, 150));
           }
         } else {
