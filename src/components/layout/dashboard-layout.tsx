@@ -6,14 +6,12 @@ import { useRouter, usePathname } from 'next/navigation';
 import { 
   LayoutDashboard, 
   Package, 
-  ShoppingCart, 
   History, 
-  BarChart3, 
-  Users, 
   Settings, 
   LogOut,
   Menu,
-  FileText
+  FileEdit,
+  ClipboardCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
@@ -24,12 +22,9 @@ import { Separator } from '@/components/ui/separator';
 
 const navItems = [
   { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
-  { label: 'Barang Habis', icon: ShoppingCart, href: '/barang-habis' },
-  { label: 'Prepare Barang', icon: FileText, href: '/prepare-barang' },
-  { label: 'Riwayat', icon: History, href: '/riwayat' },
-  { label: 'Statistik', icon: BarChart3, href: '/statistik' },
-  { label: 'Master Barang', icon: Package, href: '/master-barang', role: 'admin' },
-  { label: 'Pengguna', icon: Users, href: '/pengguna', role: 'admin' },
+  { label: 'Prepare Barang', icon: FileEdit, href: '/prepare-barang' },
+  { label: 'Cek Stok Barang', icon: ClipboardCheck, href: '/cek-stok' },
+  { label: 'Master Barang', icon: Package, href: '/master-barang' },
   { label: 'Pengaturan', icon: Settings, href: '/pengaturan' },
 ];
 
@@ -64,7 +59,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       
       <div className="flex-1 px-4 space-y-1">
         {navItems.map((item) => {
-          if (item.role === 'admin' && user.role !== 'admin') return null;
           const isActive = pathname === item.href;
           return (
             <Link key={item.href} href={item.href}>
@@ -108,12 +102,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Desktop Sidebar */}
       <aside className="fixed left-0 top-0 hidden h-full w-72 border-r bg-card/50 backdrop-blur-xl lg:block z-40">
         <SidebarContent />
       </aside>
 
-      {/* Mobile Nav */}
       <div className="lg:pl-72 flex flex-col h-screen">
         <header className="sticky top-0 h-16 border-b bg-background/80 backdrop-blur-xl flex items-center justify-between px-4 lg:px-8 z-30">
           <div className="flex items-center gap-4 lg:hidden">
@@ -145,16 +137,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <span className="text-xs text-muted-foreground">Selamat Datang,</span>
               <span className="text-sm font-semibold">{user.nama}</span>
             </div>
-            {/* Tombol Logout Cepat di Header */}
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="text-destructive hover:bg-destructive/10 h-10 w-10 rounded-xl"
-              onClick={logout}
-              title="Keluar"
-            >
-              <LogOut className="h-5 w-5" />
-            </Button>
           </div>
         </header>
 

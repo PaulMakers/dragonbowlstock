@@ -1,0 +1,255 @@
+"use client"
+
+import React, { useState, useEffect, useMemo } from 'react';
+import DashboardLayout from '@/components/layout/dashboard-layout';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { callBackend } from '@/lib/api';
+import { useToast } from '@/hooks/use-toast';
+import { 
+  Search, 
+  Calendar as CalendarIcon, 
+  Loader2,
+  Save,
+  Filter,
+  CheckCircle2,
+  AlertCircle
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { id as localeId } from 'date-fns/locale';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { KATEGORI_BARANG } from '@/lib/constants';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+
+export default function CekStokPage() {
+  const { toast } = useToast();
+  const [date, setDate] = useState<Date>(new Date());
+  const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState('');
+  const [filterCat, setFilterCat] = useState('Semua');
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const tgl = format(date, 'dd MMMM yyyy', { locale: localeId });
+      const res = await callBackend('getStokHarian', { tanggal: tgl });
+      setItems(res.data || []);
+    } catch (err) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Gagal memuat data.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [date]);
+
+  const handleInputChange = (id: string, field: 'terjual' | 'stok_fisik', value: string) => {
+    setItems(prev => prev.map(item => {
+      if (item.id === id) {
+        const val = Number(value) || 0;
+        const newItem = { ...item, [field]: val };
+        
+        // Rumus Bisnis
+        const stokTeoritis = (newItem.stok_awal || 0) + (newItem.prepare || 0) - (newItem.terjual || 0);
+        const selisih = (newItem.stok_fisik || 0) - stokTeoritis;
+        
+        return { 
+          ...newItem, 
+          stok_teoritis: stokTeoritis, 
+          selisih: selisih,
+          status: selisih === 0 ? 'Balance' : 'Selisih'
+        };
+      }
+      return item;
+    }));
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const tgl = format(date, 'dd MMMM yyyy', { locale: localeId });
+      await callBackend('saveStokHarian', { 
+        tanggal: tgl,
+        items: items
+      });
+      toast({ title: 'Berhasil', description: 'Data cek stok telah disimpan.' });
+    } catch (err) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Gagal menyimpan data.' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const filtered = items.filter(i => {
+    const matchSearch = i.nama_barang.toLowerCase().includes(search.toLowerCase());
+    const matchCat = filterCat === 'Semua' || i.kategori === filterCat;
+    return matchSearch && matchCat;
+  });
+
+  const summary = useMemo(() => {
+    const pos = items.reduce((acc, curr) => acc + (curr.selisih > 0 ? curr.selisih : 0), 0);
+    const neg = items.reduce((acc, curr) => acc + (curr.selisih < 0 ? curr.selisih : 0), 0);
+    const selisihCount = items.filter(i => i.selisih !== 0).length;
+    const balanceCount = items.filter(i => i.selisih === 0).length;
+    return { pos, neg, selisihCount, balanceCount };
+  }, [items]);
+
+  return (
+    <DashboardLayout>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-headline font-bold">Cek Stok Barang</h1>
+          <p className="text-muted-foreground">Input stok fisik dan hitung selisih otomatis.</p>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="h-12 px-4 rounded-xl border-border bg-card">
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {format(date, 'dd MMM yyyy', { locale: localeId })}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <Calendar mode="single" selected={date} onSelect={(d) => d && setDate(d)} />
+            </PopoverContent>
+          </Popover>
+          <Button 
+            className="h-12 px-6 rounded-xl primary-gradient font-bold shadow-lg shadow-primary/20"
+            onClick={handleSave}
+            disabled={saving || loading}
+          >
+            {saving ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Save className="mr-2 h-5 w-5" />}
+            Simpan Cek Stok
+          </Button>
+        </div>
+      </div>
+
+      <Card className="border-none bg-card card-shadow rounded-2xl overflow-hidden">
+        <div className="p-4 border-b flex flex-col sm:flex-row gap-4 bg-muted/30">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input 
+              placeholder="Cari barang..." 
+              className="pl-10 h-11 rounded-xl bg-background"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          <Select value={filterCat} onValueChange={setFilterCat}>
+            <SelectTrigger className="w-full sm:w-60 h-11 rounded-xl bg-background">
+              <Filter className="mr-2 h-4 w-4 text-muted-foreground" />
+              <SelectValue placeholder="Semua Kategori" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Semua">Semua Kategori</SelectItem>
+              {KATEGORI_BARANG.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <CardContent className="p-0 overflow-x-auto">
+          {loading ? (
+            <div className="py-20 text-center">
+              <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+              <p className="text-muted-foreground">Menganalisis data stok...</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50">
+                  <TableHead className="min-w-[150px]">Barang</TableHead>
+                  <TableHead className="text-center">Awal</TableHead>
+                  <TableHead className="text-center">Prepare</TableHead>
+                  <TableHead className="w-24 text-center">Terjual</TableHead>
+                  <TableHead className="text-center">Teoritis</TableHead>
+                  <TableHead className="w-24 text-center">Fisik</TableHead>
+                  <TableHead className="text-center">Selisih</TableHead>
+                  <TableHead className="text-center">Status</TableHead>
+                  <TableHead className="text-center">Stok</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filtered.map((item) => {
+                  const isPerluStock = item.stok_fisik <= (item.stok_minimum || 0);
+                  return (
+                    <TableRow key={item.id} className="hover:bg-muted/30">
+                      <TableCell>
+                        <p className="font-bold text-sm leading-tight">{item.nama_barang}</p>
+                        <p className="text-[10px] text-muted-foreground uppercase">{item.kategori}</p>
+                      </TableCell>
+                      <TableCell className="text-center font-medium">{item.stok_awal || 0}</TableCell>
+                      <TableCell className="text-center font-medium">{item.prepare || 0}</TableCell>
+                      <TableCell>
+                        <Input 
+                          type="number" 
+                          className="h-9 text-center rounded-lg" 
+                          value={item.terjual || ''}
+                          onChange={(e) => handleInputChange(item.id, 'terjual', e.target.value)}
+                        />
+                      </TableCell>
+                      <TableCell className="text-center font-bold text-blue-600">{item.stok_teoritis || 0}</TableCell>
+                      <TableCell>
+                        <Input 
+                          type="number" 
+                          className="h-9 text-center rounded-lg border-primary/20" 
+                          value={item.stok_fisik || ''}
+                          onChange={(e) => handleInputChange(item.id, 'stok_fisik', e.target.value)}
+                        />
+                      </TableCell>
+                      <TableCell className={cn(
+                        "text-center font-bold",
+                        item.selisih > 0 ? "text-green-600" : item.selisih < 0 ? "text-destructive" : ""
+                      )}>
+                        {item.selisih || 0}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge variant={item.status === 'Balance' ? 'secondary' : 'destructive'} className="text-[10px]">
+                          {item.status || 'Balance'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {isPerluStock ? (
+                          <Badge variant="outline" className="text-[10px] text-destructive border-destructive animate-pulse">
+                            Perlu Stok
+                          </Badge>
+                        ) : (
+                          <CheckCircle2 className="h-4 w-4 text-green-500 mx-auto" />
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      <div className="grid sm:grid-cols-4 gap-4">
+        {[
+          { label: 'Selisih Positif', value: summary.pos, color: 'text-green-600' },
+          { label: 'Selisih Negatif', value: summary.neg, color: 'text-destructive' },
+          { label: 'Barang Selisih', value: summary.selisihCount, color: 'text-orange-500' },
+          { label: 'Barang Balance', value: summary.balanceCount, color: 'text-blue-600' },
+        ].map((s, i) => (
+          <Card key={i} className="border-none bg-card card-shadow rounded-xl">
+            <CardContent className="p-4 flex flex-col items-center justify-center">
+              <p className="text-[10px] uppercase font-bold text-muted-foreground mb-1">{s.label}</p>
+              <h4 className={cn("text-xl font-bold", s.color)}>{s.value}</h4>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </DashboardLayout>
+  );
+}

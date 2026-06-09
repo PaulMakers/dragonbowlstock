@@ -15,8 +15,8 @@ import {
   Trash2, 
   Loader2,
   Package,
-  Database,
-  Tag
+  CheckCircle2,
+  XCircle
 } from 'lucide-react';
 import {
   Dialog,
@@ -28,104 +28,7 @@ import {
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { KATEGORI_BARANG } from '@/lib/constants';
-
-const INITIAL_ITEMS = [
-  // Dapur/Kitchen
-  { nama: 'mie kuning', kategori: 'Dapur/Kitchen' },
-  { nama: 'mie warna warni', kategori: 'Dapur/Kitchen' },
-  { nama: 'ayam kecap', kategori: 'Dapur/Kitchen' },
-  { nama: 'bawang putih goreng', kategori: 'Dapur/Kitchen' },
-  { nama: 'pangsit', kategori: 'Dapur/Kitchen' },
-  { nama: 'bakso goreng', kategori: 'Dapur/Kitchen' },
-  { nama: 'bumbu mie', kategori: 'Dapur/Kitchen' },
-  { nama: 'mie misua', kategori: 'Dapur/Kitchen' },
-  { nama: 'ayam misua', kategori: 'Dapur/Kitchen' },
-  { nama: 'jamur', kategori: 'Dapur/Kitchen' },
-  { nama: 'telur omega', kategori: 'Dapur/Kitchen' },
-  { nama: 'ayam katsu prepare', kategori: 'Dapur/Kitchen' },
-  { nama: 'Ayam sambal matah', kategori: 'Dapur/Kitchen' },
-  { nama: 'sambal matah', kategori: 'Dapur/Kitchen' },
-  { nama: 'daun jeruk', kategori: 'Dapur/Kitchen' },
-  { nama: 'bawang merah', kategori: 'Dapur/Kitchen' },
-  { nama: 'sereh', kategori: 'Dapur/Kitchen' },
-  { nama: 'cabe', kategori: 'Dapur/Kitchen' },
-  { nama: 'ayam karage', kategori: 'Dapur/Kitchen' },
-  { nama: 'ayam woku', kategori: 'Dapur/Kitchen' },
-  { nama: 'ayam rica', kategori: 'Dapur/Kitchen' },
-  { nama: 'pempek', kategori: 'Dapur/Kitchen' },
-  { nama: 'kuah cuko', kategori: 'Dapur/Kitchen' },
-  { nama: 'cireng', kategori: 'Dapur/Kitchen' },
-  { nama: 'Tahu pong', kategori: 'Dapur/Kitchen' },
-  { nama: 'cekerr mercon prepare', kategori: 'Dapur/Kitchen' },
-  { nama: 'platter', kategori: 'Dapur/Kitchen' },
-  { nama: 'kentang', kategori: 'Dapur/Kitchen' },
-  // Beverage
-  { nama: 'Kolang Kaling', kategori: 'Beverage' },
-  { nama: 'Creamer', kategori: 'Beverage' },
-  { nama: 'Sirsak', kategori: 'Beverage' },
-  { nama: 'Kelapa Kopyor', kategori: 'Beverage' },
-  { nama: 'Kuah Jahe', kategori: 'Beverage' },
-  { nama: 'Jelly Hijau', kategori: 'Beverage' },
-  { nama: 'Ketan Hitam', kategori: 'Beverage' },
-  { nama: 'Anggur', kategori: 'Beverage' },
-  { nama: 'Strawberry', kategori: 'Beverage' },
-  { nama: 'Semangka', kategori: 'Beverage' },
-  { nama: 'Semangka Kuning', kategori: 'Beverage' },
-  { nama: 'Tapai', kategori: 'Beverage' },
-  { nama: 'Melon', kategori: 'Beverage' },
-  { nama: 'Nanas', kategori: 'Beverage' },
-  { nama: 'Keju', kategori: 'Beverage' },
-  { nama: 'Sirup Cocopandan', kategori: 'Beverage' },
-  { nama: 'Mutiara', kategori: 'Beverage' },
-  { nama: 'Teh', kategori: 'Beverage' },
-  { nama: 'Cendol', kategori: 'Beverage' },
-  { nama: 'Rumput laut', kategori: 'Beverage' },
-  { nama: 'Kacang Hijau', kategori: 'Beverage' },
-  { nama: 'Ronde Kecil', kategori: 'Beverage' },
-  { nama: 'Ronde Besar', kategori: 'Beverage' },
-  { nama: 'Roti Angsle', kategori: 'Beverage' },
-  { nama: 'Alpukat', kategori: 'Beverage' },
-  { nama: 'Susu Kental Manis', kategori: 'Beverage' },
-  { nama: 'Nata de Coco', kategori: 'Beverage' },
-  { nama: 'Simple Sirup ( Air Gula )', kategori: 'Beverage' },
-  { nama: 'Mangga', kategori: 'Beverage' },
-  { nama: 'Jeruk', kategori: 'Beverage' },
-  { nama: 'Cincau', kategori: 'Beverage' },
-  { nama: 'Boba', kategori: 'Beverage' },
-  { nama: 'Nangka', kategori: 'Beverage' },
-  { nama: 'Kelapa Biasa ( Frozen )', kategori: 'Beverage' },
-  { nama: 'Es Batu', kategori: 'Beverage' },
-  { nama: 'Jus Strawberry', kategori: 'Beverage' },
-  { nama: 'Jus Alpukat', kategori: 'Beverage' },
-  { nama: 'Jus Mangga', kategori: 'Beverage' },
-  { nama: 'Ketan Putih', kategori: 'Beverage' },
-  { nama: 'Kacang Tanah', kategori: 'Beverage' },
-  { nama: 'Selasih', kategori: 'Beverage' },
-  { nama: 'Jus Blackberry', kategori: 'Beverage' },
-  { nama: 'Thai Tea', kategori: 'Beverage' },
-  // Kulkas/Bagian Depan
-  { nama: 'Sosis Kanzler', kategori: 'Kulkas/Bagian Depan' },
-  { nama: 'Air Mineral Kecil', kategori: 'Kulkas/Bagian Depan' },
-  { nama: 'Air Mineral Sedang', kategori: 'Kulkas/Bagian Depan' },
-  { nama: 'Air Mineral Besar', kategori: 'Kulkas/Bagian Depan' },
-  { nama: 'Air Kelapa', kategori: 'Kulkas/Bagian Depan' },
-  { nama: 'Susu Cimory', kategori: 'Kulkas/Bagian Depan' },
-  { nama: 'Cilok', kategori: 'Kulkas/Bagian Depan' },
-  // Packaging/Cup
-  { nama: 'Bowl Besar', kategori: 'Packaging/Cup' },
-  { nama: 'Bowl Sedang', kategori: 'Packaging/Cup' },
-  { nama: 'Bowl Kecil', kategori: 'Packaging/Cup' },
-  { nama: 'Tempat Es ( Dine In )', kategori: 'Packaging/Cup' },
-  { nama: 'Tempat Es ( Take Away )', kategori: 'Packaging/Cup' },
-  { nama: 'Tempat Cilok', kategori: 'Packaging/Cup' },
-  { nama: 'Gelas Teh Es', kategori: 'Packaging/Cup' },
-  { nama: 'Tempat Platter Combo Thai Tea', kategori: 'Packaging/Cup' },
-  // Lain-Lain
-  { nama: 'Sumpit', kategori: 'Lain-Lain' },
-  { nama: 'Sendok Plastik', kategori: 'Lain-Lain' },
-  { nama: 'Sedotan', kategori: 'Lain-Lain' },
-  { nama: 'Plastik Kecil Untuk Stock Adonan Es', kategori: 'Lain-Lain' }
-];
+import { Badge } from '@/components/ui/badge';
 
 export default function MasterBarangPage() {
   const { toast } = useToast();
@@ -134,128 +37,81 @@ export default function MasterBarangPage() {
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
-  const [formData, setFormData] = useState({ namaBarang: '', kategori: 'Dapur/Kitchen' });
+  const [formData, setFormData] = useState({ 
+    nama_barang: '', 
+    kategori: 'Lain-Lain', 
+    satuan: 'Pcs',
+    stok_minimum: 0,
+    aktif: true 
+  });
   const [submitting, setSubmitting] = useState(false);
-  const [seeding, setSeeding] = useState(false);
 
-  const fetchItems = async () => {
+  const fetchData = async () => {
     setLoading(true);
     try {
       const res = await callBackend('getMasterBarang');
       setItems(res.data || []);
-    } catch (err: any) {
-      console.error('Fetch Error:', err);
-      setItems([]);
+    } catch (err) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Gagal memuat master data.' });
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchItems();
+    fetchData();
   }, []);
 
   const handleOpenAdd = () => {
     setEditingItem(null);
-    setFormData({ namaBarang: '', kategori: 'Dapur/Kitchen' });
+    setFormData({ nama_barang: '', kategori: 'Lain-Lain', satuan: 'Pcs', stok_minimum: 0, aktif: true });
     setIsModalOpen(true);
   };
 
   const handleOpenEdit = (item: any) => {
     setEditingItem(item);
-    setFormData({ namaBarang: item.namaBarang, kategori: item.kategori || 'Dapur/Kitchen' });
+    setFormData({ 
+      nama_barang: item.nama_barang, 
+      kategori: item.kategori, 
+      satuan: item.satuan,
+      stok_minimum: item.stok_minimum,
+      aktif: item.aktif 
+    });
     setIsModalOpen(true);
-  };
-
-  const handleDelete = async (item: any) => {
-    if (!confirm(`Hapus barang "${item.namaBarang}"?`)) return;
-    try {
-      await callBackend('deleteMasterBarang', { id: item.id });
-      toast({ title: 'Dihapus', description: 'Barang telah dihapus dari master.' });
-      fetchItems();
-    } catch (err) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Gagal menghapus barang.' });
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.namaBarang) return;
-    
     setSubmitting(true);
     try {
-      if (editingItem) {
-        await callBackend('updateMasterBarang', { id: editingItem.id, ...formData });
-        toast({ title: 'Berhasil', description: 'Master barang diperbarui.' });
-      } else {
-        await callBackend('addMasterBarang', formData);
-        toast({ title: 'Berhasil', description: 'Barang baru ditambahkan.' });
-      }
-      setIsModalOpen(false);
-      fetchItems();
-    } catch (err: any) {
-      toast({ 
-        variant: 'destructive', 
-        title: 'Error', 
-        description: err.message || 'Gagal menyimpan data.' 
+      await callBackend('saveMasterBarang', { 
+        id: editingItem?.id || null, 
+        ...formData 
       });
+      toast({ title: 'Berhasil', description: 'Master barang telah disimpan.' });
+      setIsModalOpen(false);
+      fetchData();
+    } catch (err) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Gagal menyimpan data.' });
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleSeedData = async () => {
-    if (!confirm('Apakah Anda ingin menyinkronkan daftar barang? Ini akan mengisi kategori yang kosong untuk barang yang sudah ada dan menambah barang yang belum ada.')) return;
-    
-    setSeeding(true);
-    let countAdded = 0;
-    let countUpdated = 0;
+  const handleDelete = async (item: any) => {
+    if (!confirm(`Hapus atau nonaktifkan barang "${item.nama_barang}"?`)) return;
     try {
-      const existingItemsMap = new Map();
-      items.forEach(i => existingItemsMap.set(i.namaBarang?.toLowerCase(), i));
-
-      for (const initialItem of INITIAL_ITEMS) {
-        const existing = existingItemsMap.get(initialItem.nama.toLowerCase());
-        
-        if (existing) {
-          const needsUpdate = !existing.kategori || 
-                            existing.kategori === 'Cup/wadah' || 
-                            !KATEGORI_BARANG.includes(existing.kategori as any);
-                            
-          if (needsUpdate) {
-            await callBackend('updateMasterBarang', { 
-              id: existing.id, 
-              namaBarang: initialItem.nama, 
-              kategori: initialItem.kategori 
-            });
-            countUpdated++;
-            await new Promise(resolve => setTimeout(resolve, 150));
-          }
-        } else {
-          await callBackend('addMasterBarang', { 
-            namaBarang: initialItem.nama, 
-            kategori: initialItem.kategori 
-          });
-          countAdded++;
-          await new Promise(resolve => setTimeout(resolve, 150));
-        }
-      }
-      
-      toast({ 
-        title: 'Selesai', 
-        description: `${countAdded} barang baru ditambah, ${countUpdated} kategori barang diperbarui.` 
-      });
-      fetchItems();
-    } catch (err: any) {
-      toast({ variant: 'destructive', title: 'Gagal', description: 'Gagal sinkronisasi data.' });
-    } finally {
-      setSeeding(false);
+      await callBackend('saveMasterBarang', { ...item, aktif: false });
+      toast({ title: 'Berhasil', description: 'Barang telah dinonaktifkan.' });
+      fetchData();
+    } catch (err) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Gagal menghapus data.' });
     }
   };
 
-  const filteredItems = items.filter(i => 
-    i.namaBarang?.toLowerCase().includes(search.toLowerCase()) ||
-    i.kategori?.toLowerCase().includes(search.toLowerCase())
+  const filtered = items.filter(i => 
+    i.nama_barang.toLowerCase().includes(search.toLowerCase()) || 
+    i.kategori.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -263,28 +119,20 @@ export default function MasterBarangPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-headline font-bold">Master Barang</h1>
-          <p className="text-muted-foreground">Kelola daftar referensi barang untuk seluruh outlet.</p>
+          <p className="text-muted-foreground">Kelola daftar SKU, kategori, dan satuan stok.</p>
         </div>
-        <div className="flex gap-2">
-          {!loading && (
-             <Button onClick={handleSeedData} variant="outline" className="h-12 px-6 rounded-xl border-primary/40 text-primary hover:bg-primary/5" disabled={seeding}>
-              {seeding ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Database className="mr-2 h-5 w-5" />}
-              Sinkron Data Awal
-            </Button>
-          )}
-          <Button onClick={handleOpenAdd} className="h-12 px-6 rounded-xl primary-gradient font-semibold">
-            <Plus className="mr-2 h-5 w-5" /> Tambah Barang
-          </Button>
-        </div>
+        <Button onClick={handleOpenAdd} className="h-12 px-6 rounded-xl primary-gradient font-bold shadow-lg shadow-primary/20">
+          <Plus className="mr-2 h-5 w-5" /> Tambah Barang
+        </Button>
       </div>
 
-      <Card className="border-none card-shadow rounded-2xl overflow-hidden bg-card">
+      <Card className="border-none bg-card card-shadow rounded-2xl overflow-hidden">
         <div className="p-4 border-b bg-muted/30">
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input 
-              placeholder="Cari nama atau kategori..." 
-              className="pl-10 h-11 rounded-xl bg-background/50"
+              placeholder="Cari barang atau kategori..." 
+              className="pl-10 h-11 rounded-xl bg-background"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -292,86 +140,99 @@ export default function MasterBarangPage() {
         </div>
         <CardContent className="p-0">
           {loading ? (
-            <div className="p-12 text-center">
+            <div className="py-20 text-center">
               <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-              <p className="text-muted-foreground">Sedang mengambil data...</p>
+              <p className="text-muted-foreground">Memuat master data...</p>
             </div>
-          ) : filteredItems.length > 0 ? (
-            <div className="divide-y divide-border">
-              {filteredItems.map((item) => (
-                <div key={item.id} className="flex items-center justify-between p-4 px-6 hover:bg-muted/30 transition-colors">
+          ) : (
+            <div className="divide-y">
+              {filtered.map((item) => (
+                <div key={item.id} className="p-4 flex items-center justify-between hover:bg-muted/30">
                   <div className="flex items-center gap-4">
                     <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                       <Package className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="font-bold text-lg">{item.namaBarang}</p>
-                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <Tag className="h-3 w-3" /> {item.kategori || 'Tanpa Kategori'}
+                      <div className="flex items-center gap-2">
+                        <p className="font-bold">{item.nama_barang}</p>
+                        {!item.aktif && <Badge variant="destructive">Nonaktif</Badge>}
                       </div>
+                      <p className="text-xs text-muted-foreground">{item.kategori} • {item.satuan} • Min: {item.stok_minimum}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" onClick={() => handleOpenEdit(item)} className="h-10 w-10 rounded-full">
+                    <Button variant="ghost" size="icon" onClick={() => handleOpenEdit(item)}>
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(item)} className="h-10 w-10 rounded-full text-destructive">
+                    <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDelete(item)}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
               ))}
             </div>
-          ) : (
-            <div className="p-20 text-center">
-              <Package className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
-              <h3 className="font-headline text-xl font-bold">Tidak ada barang</h3>
-            </div>
           )}
         </CardContent>
       </Card>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-md rounded-2xl">
+        <DialogContent className="rounded-2xl sm:max-w-md">
           <form onSubmit={handleSubmit}>
             <DialogHeader>
-              <DialogTitle className="text-2xl font-headline">{editingItem ? 'Edit Barang' : 'Tambah Barang'}</DialogTitle>
-              <DialogDescription>Masukkan detail barang untuk master data.</DialogDescription>
+              <DialogTitle>{editingItem ? 'Edit Barang' : 'Tambah Barang Baru'}</DialogTitle>
+              <DialogDescription>Masukkan detail SKU untuk kontrol stok.</DialogDescription>
             </DialogHeader>
             <div className="py-6 space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="namaBarang">Nama Barang</Label>
+                <Label>Nama Barang</Label>
                 <Input 
-                  id="namaBarang" 
-                  placeholder="Contoh: Telur Ayam" 
-                  value={formData.namaBarang}
-                  onChange={(e) => setFormData({ ...formData, namaBarang: e.target.value })}
                   required
-                  className="h-12 rounded-xl"
+                  placeholder="Cth: Mie Ayam" 
+                  value={formData.nama_barang}
+                  onChange={(e) => setFormData({ ...formData, nama_barang: e.target.value })}
                 />
               </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Kategori</Label>
+                  <Select 
+                    value={formData.kategori} 
+                    onValueChange={(v) => setFormData({ ...formData, kategori: v })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {KATEGORI_BARANG.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Satuan</Label>
+                  <Input 
+                    required
+                    placeholder="Cth: Porsi / Gelas" 
+                    value={formData.satuan}
+                    onChange={(e) => setFormData({ ...formData, satuan: e.target.value })}
+                  />
+                </div>
+              </div>
               <div className="space-y-2">
-                <Label>Kategori</Label>
-                <Select 
-                  value={formData.kategori} 
-                  onValueChange={(v) => setFormData({ ...formData, kategori: v })}
-                >
-                  <SelectTrigger className="h-12 rounded-xl" side="bottom">
-                    <SelectValue placeholder="Pilih Kategori" />
-                  </SelectTrigger>
-                  <SelectContent side="bottom" position="popper">
-                    {KATEGORI_BARANG.map(cat => (
-                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label>Stok Minimum (Opsional)</Label>
+                <Input 
+                  type="number"
+                  placeholder="0" 
+                  value={formData.stok_minimum}
+                  onChange={(e) => setFormData({ ...formData, stok_minimum: Number(e.target.value) })}
+                />
+                <p className="text-[10px] text-muted-foreground">Status "Perlu Stok" akan muncul jika stok fisik kurang dari nilai ini.</p>
               </div>
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} className="h-12 px-6 rounded-xl">Batal</Button>
-              <Button type="submit" className="h-12 px-8 rounded-xl primary-gradient font-bold" disabled={submitting}>
-                {submitting && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
-                Simpan
+              <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>Batal</Button>
+              <Button type="submit" className="primary-gradient font-bold" disabled={submitting}>
+                {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Simpan Barang
               </Button>
             </DialogFooter>
           </form>
