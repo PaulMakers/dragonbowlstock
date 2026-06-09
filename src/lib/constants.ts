@@ -5,8 +5,7 @@ export const KATEGORI_BARANG = [
   'Dapur/Kitchen',
   'Beverage/Minuman',
   'Depan/Kulkas',
-  'Packaging/Cup',
-  'Lain-Lain'
+  'Dll/Perlengkapan'
 ] as const;
 
 export type KategoriType = (typeof KATEGORI_BARANG)[number];
