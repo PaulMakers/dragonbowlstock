@@ -15,7 +15,7 @@ export async function callBackend(action: string, payload: any = {}) {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`Koneksi server gagal: ${response.status}`);
     }
 
     const text = await response.text();
@@ -23,7 +23,7 @@ export async function callBackend(action: string, payload: any = {}) {
     try {
       data = JSON.parse(text);
     } catch (e) {
-      throw new Error(`Invalid JSON: ${text.substring(0, 100)}`);
+      throw new Error(`Format data dari server tidak valid. Pastikan Apps Script sudah di-deploy.`);
     }
 
     if (data.error) {

@@ -7,32 +7,37 @@ import {
   Package, 
   TrendingUp, 
   AlertTriangle, 
-  ClipboardCheck, 
-  History,
-  Activity
+  Activity,
+  AlertCircle
 } from 'lucide-react';
 import { callBackend } from '@/lib/api';
 import { format } from 'date-fns';
 import { id as localeId } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from '@/components/ui/button';
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const today = format(new Date(), 'dd MMMM yyyy', { locale: localeId });
+      const res = await callBackend('getDashboardStats', { today });
+      setStats(res);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const today = format(new Date(), 'dd MMMM yyyy', { locale: localeId });
-        const res = await callBackend('getDashboardStats', { today });
-        setStats(res);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
     fetchData();
   }, []);
 
@@ -42,6 +47,27 @@ export default function DashboardPage() {
     { label: 'Barang Perlu Stok', value: stats?.needStock || 0, icon: AlertTriangle, color: 'text-destructive', bg: 'bg-destructive/10' },
     { label: 'Barang Selisih', value: stats?.selisihCount || 0, icon: Activity, color: 'text-orange-500', bg: 'bg-orange-500/10' },
   ];
+
+  if (error) {
+    return (
+      <DashboardLayout>
+        <Alert variant="destructive" className="rounded-2xl border-2">
+          <AlertCircle className="h-5 w-5" />
+          <AlertTitle className="font-bold">Backend Belum Siap</AlertTitle>
+          <AlertDescription className="mt-2">
+            <p className="mb-4">{error}</p>
+            <div className="bg-background/20 p-4 rounded-xl text-xs font-mono mb-4">
+              Langkah Fix: <br/>
+              1. Buka Apps Script <br/>
+              2. Tempel kode v3.1 terbaru <br/>
+              3. Klik Deploy {'>'} New Deployment
+            </div>
+            <Button variant="outline" className="bg-white/10" onClick={fetchData}>Coba Lagi</Button>
+          </AlertDescription>
+        </Alert>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -109,7 +135,7 @@ export default function DashboardPage() {
               <TrendingUp className="h-5 w-5 text-primary" />
               Sering Habis
             </CardTitle>
-            <CardDescription>30 hari terakhir (Status: Perlu Stock)</CardDescription>
+            <CardDescription>30 hari terakhir (Histori Perlu Stock)</CardDescription>
           </CardHeader>
           <CardContent className="p-0">
             {loading ? (
