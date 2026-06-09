@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react';
@@ -8,7 +9,8 @@ import {
   TrendingUp, 
   AlertTriangle, 
   Activity,
-  AlertCircle
+  AlertCircle,
+  RefreshCcw
 } from 'lucide-react';
 import { callBackend } from '@/lib/api';
 import { format } from 'date-fns';
@@ -51,20 +53,38 @@ export default function DashboardPage() {
   if (error) {
     return (
       <DashboardLayout>
-        <Alert variant="destructive" className="rounded-2xl border-2">
-          <AlertCircle className="h-5 w-5" />
-          <AlertTitle className="font-bold">Backend Belum Siap</AlertTitle>
-          <AlertDescription className="mt-2">
-            <p className="mb-4">{error}</p>
-            <div className="bg-background/20 p-4 rounded-xl text-xs font-mono mb-4">
-              Langkah Fix: <br/>
-              1. Buka Apps Script <br/>
-              2. Tempel kode v3.1 terbaru <br/>
-              3. Klik Deploy {'>'} New Deployment
-            </div>
-            <Button variant="outline" className="bg-white/10" onClick={fetchData}>Coba Lagi</Button>
-          </AlertDescription>
-        </Alert>
+        <div className="max-w-2xl mx-auto py-10">
+          <Alert variant="destructive" className="rounded-2xl border-2 shadow-xl bg-destructive/5">
+            <AlertCircle className="h-6 w-6" />
+            <AlertTitle className="text-xl font-bold mb-2">Backend Belum Siap</AlertTitle>
+            <AlertDescription className="space-y-4">
+              <p className="text-sm opacity-90 leading-relaxed">
+                Terjadi kesalahan pada server Google Apps Script: <br/>
+                <code className="bg-destructive/10 px-2 py-1 rounded font-mono text-xs block mt-2">{error}</code>
+              </p>
+              
+              <div className="bg-background/50 p-4 rounded-xl border border-destructive/20 text-xs space-y-2">
+                <p className="font-bold uppercase tracking-wider text-[10px] text-muted-foreground">Langkah Perbaikan:</p>
+                <ol className="list-decimal list-inside space-y-1 ml-1">
+                  <li>Buka <b>Extensions {'>'} Apps Script</b> di Google Sheets Anda.</li>
+                  <li>Hapus <b>SELURUH</b> kode yang ada di sana.</li>
+                  <li>Tempelkan kode <b>v3.2 FULL VERSION</b> terbaru dari asisten AI.</li>
+                  <li>Klik <b>Deploy {'>'} New Deployment</b>.</li>
+                  <li>Pastikan akses diatur ke <b>"Anyone"</b>.</li>
+                </ol>
+              </div>
+              
+              <Button 
+                variant="outline" 
+                className="w-full h-11 rounded-xl border-destructive/30 hover:bg-destructive/10" 
+                onClick={fetchData}
+              >
+                <RefreshCcw className="mr-2 h-4 w-4" />
+                Coba Hubungkan Kembali
+              </Button>
+            </AlertDescription>
+          </Alert>
+        </div>
       </DashboardLayout>
     );
   }
