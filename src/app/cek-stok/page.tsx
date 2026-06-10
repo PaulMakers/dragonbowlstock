@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -52,15 +53,17 @@ export default function CekStokPage() {
     fetchData();
   }, [date]);
 
-  const handleInputChange = (id: string, field: 'terjual' | 'stok_fisik', value: string) => {
+  const handleInputChange = (id: string, field: 'stok_awal' | 'terjual' | 'stok_fisik', value: string) => {
     setItems(prev => prev.map(item => {
       if (item.id === id) {
         const val = Number(value) || 0;
         const newItem = { ...item, [field]: val };
         
-        // Rumus Bisnis
-        const stokTeoritis = (newItem.stok_awal || 0) + (newItem.prepare || 0) - (newItem.terjual || 0);
-        const selisih = (newItem.stok_fisik || 0) - stokTeoritis;
+        // Rumus Bisnis: Stok Teoritis = Stok Awal + Prepare - Terjual
+        const stokTeoritis = (Number(newItem.stok_awal) || 0) + (Number(newItem.prepare) || 0) - (Number(newItem.terjual) || 0);
+        
+        // Selisih = Stok Fisik - Stok Teoritis
+        const selisih = (Number(newItem.stok_fisik) || 0) - stokTeoritis;
         
         return { 
           ...newItem, 
@@ -96,19 +99,19 @@ export default function CekStokPage() {
   });
 
   const summary = useMemo(() => {
-    const pos = items.reduce((acc, curr) => acc + (curr.selisih > 0 ? curr.selisih : 0), 0);
-    const neg = items.reduce((acc, curr) => acc + (curr.selisih < 0 ? curr.selisih : 0), 0);
-    const selisihCount = items.filter(i => i.selisih !== 0).length;
-    const balanceCount = items.filter(i => i.selisih === 0).length;
+    const pos = filtered.reduce((acc, curr) => acc + (curr.selisih > 0 ? curr.selisih : 0), 0);
+    const neg = filtered.reduce((acc, curr) => acc + (curr.selisih < 0 ? curr.selisih : 0), 0);
+    const selisihCount = filtered.filter(i => i.selisih !== 0).length;
+    const balanceCount = filtered.filter(i => i.selisih === 0).length;
     return { pos, neg, selisihCount, balanceCount };
-  }, [items]);
+  }, [filtered]);
 
   return (
     <DashboardLayout>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-headline font-bold">Cek Stok Barang</h1>
-          <p className="text-muted-foreground">Input stok fisik dan hitung selisih otomatis.</p>
+          <p className="text-muted-foreground">Input stok awal, terjual, dan fisik untuk hitung selisih.</p>
         </div>
         
         <div className="flex items-center gap-2">
@@ -168,32 +171,41 @@ export default function CekStokPage() {
               <TableHeader>
                 <TableRow className="bg-muted/50">
                   <TableHead className="min-w-[150px]">Barang</TableHead>
-                  <TableHead className="text-center">Awal</TableHead>
+                  <TableHead className="w-24 text-center">Stok Awal</TableHead>
                   <TableHead className="text-center">Prepare</TableHead>
                   <TableHead className="w-24 text-center">Terjual</TableHead>
                   <TableHead className="text-center">Teoritis</TableHead>
-                  <TableHead className="w-24 text-center">Fisik</TableHead>
+                  <TableHead className="w-24 text-center">Stok Fisik</TableHead>
                   <TableHead className="text-center">Selisih</TableHead>
                   <TableHead className="text-center">Status</TableHead>
-                  <TableHead className="text-center">Stok</TableHead>
+                  <TableHead className="text-center">Status Stok</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filtered.map((item) => {
-                  const isPerluStock = item.stok_fisik <= (item.stok_minimum || 0);
+                  const isPerluStock = Number(item.stok_fisik) <= (Number(item.stok_minimum) || 0);
                   return (
                     <TableRow key={item.id} className="hover:bg-muted/30">
                       <TableCell>
                         <p className="font-bold text-sm leading-tight">{item.nama_barang}</p>
                         <p className="text-[10px] text-muted-foreground uppercase">{item.kategori}</p>
                       </TableCell>
-                      <TableCell className="text-center font-medium">{item.stok_awal || 0}</TableCell>
+                      <TableCell>
+                        <Input 
+                          type="number" 
+                          className="h-9 text-center rounded-lg bg-primary/5 border-primary/20 font-medium" 
+                          value={item.stok_awal === 0 ? '' : item.stok_awal}
+                          placeholder="0"
+                          onChange={(e) => handleInputChange(item.id, 'stok_awal', e.target.value)}
+                        />
+                      </TableCell>
                       <TableCell className="text-center font-medium">{item.prepare || 0}</TableCell>
                       <TableCell>
                         <Input 
                           type="number" 
                           className="h-9 text-center rounded-lg" 
-                          value={item.terjual || ''}
+                          value={item.terjual === 0 ? '' : item.terjual}
+                          placeholder="0"
                           onChange={(e) => handleInputChange(item.id, 'terjual', e.target.value)}
                         />
                       </TableCell>
@@ -201,8 +213,9 @@ export default function CekStokPage() {
                       <TableCell>
                         <Input 
                           type="number" 
-                          className="h-9 text-center rounded-lg border-primary/20" 
-                          value={item.stok_fisik || ''}
+                          className="h-9 text-center rounded-lg border-primary/40 font-bold" 
+                          value={item.stok_fisik === 0 ? '' : item.stok_fisik}
+                          placeholder="0"
                           onChange={(e) => handleInputChange(item.id, 'stok_fisik', e.target.value)}
                         />
                       </TableCell>
@@ -235,7 +248,7 @@ export default function CekStokPage() {
         </CardContent>
       </Card>
 
-      <div className="grid sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
           { label: 'Selisih Positif', value: summary.pos, color: 'text-green-600' },
           { label: 'Selisih Negatif', value: summary.neg, color: 'text-destructive' },
