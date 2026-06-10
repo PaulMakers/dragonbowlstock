@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react';
@@ -18,16 +19,19 @@ import {
   AlertCircle,
   Plus,
   Tag,
-  Package
+  Package,
+  Sparkles,
+  X
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { id as localeId } from 'date-fns/locale';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { KATEGORI_BARANG } from '@/lib/constants';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { parseStockReport } from '@/ai/flows/parse-stock-report-flow';
 
 type ItemEntry = {
   kategori: string;
@@ -48,6 +52,9 @@ export default function BarangHabisPage() {
   ]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [isAIDialogOpen, setIsAIDialogOpen] = useState(false);
+  const [aiInput, setAiInput] = useState('');
+  const [parsing, setParsing] = useState(false);
 
   useEffect(() => {
     async function loadMaster() {
@@ -79,13 +86,31 @@ export default function BarangHabisPage() {
   const updateEntry = (index: number, field: keyof ItemEntry, value: string) => {
     const newEntries = [...entries];
     (newEntries[index] as any)[field] = value;
-    
-    // Reset namaBarang jika kategori berubah
     if (field === 'kategori') {
       newEntries[index].namaBarang = '';
     }
-    
     setEntries(newEntries);
+  };
+
+  const handleAISubmit = async () => {
+    if (!aiInput.trim()) return;
+    setParsing(true);
+    try {
+      const res = await parseStockReport({ text: aiInput });
+      if (res.entries && res.entries.length > 0) {
+        // Gabungkan dengan entri yang sudah ada atau ganti jika entri pertama masih kosong
+        const isFirstEmpty = entries.length === 1 && !entries[0].namaBarang;
+        const newEntries = isFirstEmpty ? [...res.entries] : [...entries, ...res.entries];
+        setEntries(newEntries as any);
+        toast({ title: 'AI Berhasil', description: `${res.entries.length} barang berhasil dikenali.` });
+        setIsAIDialogOpen(false);
+        setAiInput('');
+      }
+    } catch (err) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Gagal memproses teks dengan AI.' });
+    } finally {
+      setParsing(false);
+    }
   };
 
   const handleSave = async () => {
@@ -127,17 +152,27 @@ export default function BarangHabisPage() {
           <p className="text-muted-foreground">Catat ketersediaan barang di outlet hari ini.</p>
         </div>
         
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" className="w-full sm:w-[240px] justify-start h-12 rounded-xl">
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {date ? format(date, 'PPP', { locale: localeId }) : <span>Pilih Tanggal</span>}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="end" side="bottom">
-            <Calendar mode="single" selected={date} onSelect={(d) => d && setDate(d)} initialFocus />
-          </PopoverContent>
-        </Popover>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            className="h-12 px-6 rounded-xl border-primary/40 text-primary font-bold bg-primary/5 hover:bg-primary/10 transition-all"
+            onClick={() => setIsAIDialogOpen(true)}
+          >
+            <Sparkles className="mr-2 h-5 w-5 text-primary" />
+            Lapor Pakai AI
+          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="w-[200px] justify-start h-12 rounded-xl">
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {date ? format(date, 'PPP', { locale: localeId }) : <span>Pilih Tanggal</span>}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end" side="bottom">
+              <Calendar mode="single" selected={date} onSelect={(d) => d && setDate(d)} initialFocus />
+            </PopoverContent>
+          </Popover>
+        </div>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
@@ -190,6 +225,7 @@ export default function BarangHabisPage() {
                           {filteredMaster.map((item: any) => (
                             <SelectItem key={item.id} value={item.namaBarang}>{item.namaBarang}</SelectItem>
                           ))}
+                          <SelectItem value={entry.namaBarang}>{entry.namaBarang} (Custom)</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -211,7 +247,6 @@ export default function BarangHabisPage() {
                     <div className="space-y-2">
                       <Label>Jumlah {entry.status === 'Tersedia' ? 'Sisa' : 'Kurang'}</Label>
                       <Input 
-                        type="number" 
                         placeholder="Cth: 10" 
                         className="h-11 rounded-xl text-center font-bold"
                         value={entry.jumlah}
@@ -258,36 +293,65 @@ export default function BarangHabisPage() {
           <Card className="border-none bg-card card-shadow rounded-2xl overflow-hidden sticky top-24">
             <div className="bg-primary/5 p-4">
               <h3 className="text-lg font-bold flex items-center gap-2">
-                <AlertCircle className="h-5 w-5 text-primary" />
-                Informasi Pengisian
+                <Sparkles className="h-5 w-5 text-primary" />
+                Tips Lapor Cepat
               </h3>
             </div>
             <CardContent className="p-6 space-y-4">
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Silakan pilih kategori terlebih dahulu untuk mempercepat pencarian barang. 
+                Punya catatan sisa stok di WhatsApp? Klik <b>"Lapor Pakai AI"</b> lalu tempel teks Anda. Sistem akan otomatis mengisi form untuk Anda.
               </p>
               <div className="space-y-3">
                 <div className="flex gap-3 text-sm">
                   <div className="h-5 w-5 rounded bg-green-500/10 text-green-500 flex items-center justify-center font-bold">1</div>
-                  <span>Pilih <b>Kategori</b> barang.</span>
+                  <span>Klik Tombol <b>Lapor Pakai AI</b>.</span>
                 </div>
                 <div className="flex gap-3 text-sm">
                   <div className="h-5 w-5 rounded bg-green-500/10 text-green-500 flex items-center justify-center font-bold">2</div>
-                  <span>Pilih <b>Nama Barang</b> (Hanya muncul yang sesuai kategori).</span>
+                  <span>Tempel teks catatan stok Anda.</span>
                 </div>
                 <div className="flex gap-3 text-sm">
                   <div className="h-5 w-5 rounded bg-green-500/10 text-green-500 flex items-center justify-center font-bold">3</div>
-                  <span>Input Status, Jumlah, dan Satuan.</span>
+                  <span>Periksa & Klik Simpan.</span>
                 </div>
               </div>
-              <Separator />
-              <p className="text-xs text-muted-foreground italic">
-                Sisa stok tetap bisa dicatat meskipun status barang masih "Tersedia".
-              </p>
             </CardContent>
           </Card>
         </div>
       </div>
+
+      <Dialog open={isAIDialogOpen} onOpenChange={setIsAIDialogOpen}>
+        <DialogContent className="sm:max-w-lg rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              Lapor Cepat via AI
+            </DialogTitle>
+            <DialogDescription>
+              Tempel catatan stok Anda di sini (Cth: Nangka - 1 Pack, Mutiara - Habis).
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Textarea 
+              placeholder="Tempel catatan di sini..."
+              className="min-h-[200px] rounded-xl font-mono text-sm"
+              value={aiInput}
+              onChange={(e) => setAiInput(e.target.value)}
+            />
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="ghost" onClick={() => setIsAIDialogOpen(false)}>Batal</Button>
+            <Button 
+              className="primary-gradient font-bold px-8 rounded-xl" 
+              onClick={handleAISubmit}
+              disabled={parsing || !aiInput}
+            >
+              {parsing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+              Bedah Teks Sekarang
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }
