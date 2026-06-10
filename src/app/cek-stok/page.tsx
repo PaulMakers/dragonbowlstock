@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -14,9 +15,9 @@ import {
   Save,
   Filter,
   CheckCircle2,
-  AlertCircle,
   Database,
-  ShoppingCart
+  ShoppingCart,
+  AlertCircle
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { id as localeId } from 'date-fns/locale';
@@ -27,7 +28,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { cn } from '@/lib/utils';
 
 export default function CekStokPage() {
@@ -61,7 +62,6 @@ export default function CekStokPage() {
       if (item.id === id) {
         const newItem = { ...item, [field]: value };
         
-        // Hanya hitung ulang jika yang diubah adalah angka stok
         if (['stok_awal', 'terjual', 'stok_fisik'].includes(field as string)) {
           const sAwal = Number(field === 'stok_awal' ? value : item.stok_awal) || 0;
           const sTerjual = Number(field === 'terjual' ? value : item.terjual) || 0;
@@ -151,9 +151,9 @@ export default function CekStokPage() {
 
       <Alert className="bg-blue-500/10 border-blue-500/20 rounded-2xl mb-6">
         <Database className="h-5 w-5 text-blue-500" />
-        <AlertTitle className="font-bold">Informasi Stok</AlertTitle>
+        <AlertTitle className="font-bold">Inisialisasi Stok</AlertTitle>
         <AlertDescription className="text-sm">
-          Kolom <b>Manual?</b> digunakan jika Anda ingin menandai barang perlu dipesan meskipun stok fisik masih mencukupi secara sistem.
+          Gunakan toggle <b>Perlu Stok</b> jika barang harus segera dipesan meskipun stok fisik masih mencukupi.
         </AlertDescription>
       </Alert>
 
@@ -198,8 +198,8 @@ export default function CekStokPage() {
                   <TableHead className="w-20 text-center">Fisik</TableHead>
                   <TableHead className="text-center">Slisih</TableHead>
                   <TableHead className="text-center">Status</TableHead>
-                  <TableHead className="text-center">Manual?</TableHead>
-                  <TableHead className="text-center">Order?</TableHead>
+                  <TableHead className="text-center">Perlu Stok</TableHead>
+                  <TableHead className="text-center">Status Pesan</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -252,10 +252,9 @@ export default function CekStokPage() {
                       </TableCell>
                       <TableCell className="text-center">
                         <div className="flex justify-center">
-                          <Checkbox 
+                          <Switch 
                             checked={item.perlu_stock_manual}
-                            onCheckedChange={(checked) => handleInputChange(item.id, 'perlu_stock_manual', checked === true)}
-                            className="h-5 w-5"
+                            onCheckedChange={(checked) => handleInputChange(item.id, 'perlu_stock_manual', checked)}
                           />
                         </div>
                       </TableCell>
