@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -15,13 +14,14 @@ import {
   Save,
   Filter,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Database
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { id as localeId } from 'date-fns/locale';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { KATEGORI_BARANG } from '@/lib/constants';
+import { KATEGORI_BARANG, StokHarian } from '@/lib/constants';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -30,7 +30,7 @@ import { cn } from '@/lib/utils';
 export default function CekStokPage() {
   const { toast } = useToast();
   const [date, setDate] = useState<Date>(new Date());
-  const [items, setItems] = useState<any[]>([]);
+  const [items, setItems] = useState<StokHarian[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState('');
@@ -137,6 +137,14 @@ export default function CekStokPage() {
         </div>
       </div>
 
+      <Alert className="bg-blue-500/10 border-blue-500/20 rounded-2xl mb-6">
+        <Database className="h-5 w-5 text-blue-500" />
+        <AlertTitle className="font-bold">Inisialisasi Stok Awal</AlertTitle>
+        <AlertDescription className="text-sm">
+          Untuk penggunaan pertama kali, silakan isi kolom <b>Stok Awal</b> secara manual. Selanjutnya, stok awal akan diambil dari stok fisik hari kemarin.
+        </AlertDescription>
+      </Alert>
+
       <Card className="border-none bg-card card-shadow rounded-2xl overflow-hidden">
         <div className="p-4 border-b flex flex-col sm:flex-row gap-4 bg-muted/30">
           <div className="relative flex-1">
@@ -193,7 +201,7 @@ export default function CekStokPage() {
                       <TableCell>
                         <Input 
                           type="number" 
-                          className="h-9 text-center rounded-lg bg-primary/5 border-primary/20 font-medium" 
+                          className="h-9 text-center rounded-lg bg-blue-500/5 border-blue-500/30 font-bold focus:ring-blue-500" 
                           value={item.stok_awal === 0 ? '' : item.stok_awal}
                           placeholder="0"
                           onChange={(e) => handleInputChange(item.id, 'stok_awal', e.target.value)}
@@ -248,7 +256,7 @@ export default function CekStokPage() {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
         {[
           { label: 'Selisih Positif', value: summary.pos, color: 'text-green-600' },
           { label: 'Selisih Negatif', value: summary.neg, color: 'text-destructive' },

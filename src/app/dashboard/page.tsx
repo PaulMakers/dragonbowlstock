@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react';
@@ -10,7 +9,9 @@ import {
   AlertTriangle, 
   Activity,
   AlertCircle,
-  RefreshCcw
+  RefreshCcw,
+  Rocket,
+  ArrowRight
 } from 'lucide-react';
 import { callBackend } from '@/lib/api';
 import { format } from 'date-fns';
@@ -19,6 +20,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<any>(null);
@@ -68,7 +70,7 @@ export default function DashboardPage() {
                 <ol className="list-decimal list-inside space-y-1 ml-1">
                   <li>Buka <b>Extensions {'>'} Apps Script</b> di Google Sheets Anda.</li>
                   <li>Hapus <b>SELURUH</b> kode yang ada di sana.</li>
-                  <li>Tempelkan kode <b>v3.2 FULL VERSION</b> terbaru dari asisten AI.</li>
+                  <li>Tempelkan kode <b>v3.3 FULL VERSION</b> terbaru dari asisten AI.</li>
                   <li>Klik <b>Deploy {'>'} New Deployment</b>.</li>
                   <li>Pastikan akses diatur ke <b>"Anyone"</b>.</li>
                 </ol>
@@ -95,6 +97,21 @@ export default function DashboardPage() {
         <h1 className="text-3xl font-headline font-bold">Ringkasan Operasional</h1>
         <p className="text-muted-foreground">{format(new Date(), 'EEEE, dd MMMM yyyy', { locale: localeId })}</p>
       </div>
+
+      {!loading && stats?.totalSku === 0 && (
+        <Alert className="bg-primary/10 border-primary/20 p-6 rounded-2xl animate-in fade-in zoom-in duration-300">
+          <Rocket className="h-8 w-8 text-primary mb-4" />
+          <AlertTitle className="text-xl font-bold text-primary">Data Barang Masih Kosong</AlertTitle>
+          <AlertDescription className="mt-2 space-y-4">
+            <p className="text-muted-foreground">Sistem mendeteksi Anda belum memiliki data barang. Mulai dengan memasukkan 130+ template barang Dragon Bowl secara otomatis.</p>
+            <Link href="/master-barang">
+              <Button className="primary-gradient font-bold h-11 px-6 rounded-xl mt-4">
+                Mulai Setup Barang <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {loading ? (

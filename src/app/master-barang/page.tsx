@@ -215,51 +215,23 @@ export default function MasterBarangPage() {
   }, []);
 
   const handleSyncInitialData = async () => {
-    if (!confirm('Sinkronkan seluruh data barang templat ke database? Ini akan memperbarui kategori barang yang sudah ada.')) return;
+    if (!confirm('Sinkronkan seluruh data barang templat ke database? Ini akan mempercepat setup awal.')) return;
     
     setSyncing(true);
-    let added = 0;
-    let updated = 0;
     try {
-      const currentMap = new Map();
-      items.forEach(i => currentMap.set(i.nama_barang.toLowerCase(), i));
-
-      for (const item of INITIAL_DATA) {
-        const existing = currentMap.get(item.nama_barang.toLowerCase());
-        if (existing) {
-          // Jika sudah ada, update kategorinya
-          await callBackend('saveMasterBarang', {
-            id: existing.id,
-            nama_barang: item.nama_barang,
-            kategori: item.kategori,
-            satuan: item.satuan,
-            stok_minimum: existing.stok_minimum || 0,
-            aktif: true
-          });
-          updated++;
-        } else {
-          // Jika belum ada, tambah baru
-          await callBackend('saveMasterBarang', {
-            nama_barang: item.nama_barang,
-            kategori: item.kategori,
-            satuan: item.satuan,
-            stok_minimum: 0,
-            aktif: true
-          });
-          added++;
-        }
-      }
-      toast({ title: 'Sinkronisasi Berhasil', description: `${added} barang baru ditambah, ${updated} kategori diperbarui.` });
+      // Optimasi: Gunakan bulk action baru di v3.3
+      await callBackend('bulkSaveMasterBarang', { items: INITIAL_DATA });
+      toast({ title: 'Sinkronisasi Berhasil', description: `Seluruh data barang template telah dimasukkan.` });
       fetchData();
     } catch (err) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Gagal sinkronisasi data.' });
+      toast({ variant: 'destructive', title: 'Error', description: 'Gagal sinkronisasi data massal.' });
     } finally {
       setSyncing(false);
     }
   };
 
   const handleOpenAdd = () => {
-    setEditingItem(null);
+    setEditingUser(null);
     setFormData({ nama_barang: '', kategori: 'Dapur/Kitchen', satuan: 'Pcs', stok_minimum: 0, aktif: true });
     setIsModalOpen(true);
   };

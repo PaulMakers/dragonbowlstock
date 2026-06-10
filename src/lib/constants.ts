@@ -1,4 +1,4 @@
-export const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz8PTFmNrqQ067PuXNAAWEqtGLn8d6Ut-J6TIz6NkuP4mO9FsW6q2MbZe5FzEYZ2vmQ/exec';
+export const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbws0QDLrehpisu4eO8lnt9A3rGYB21aCII3YLctEDbeKruaIxdiM9YO-oIxZPWsm3Yf/exec';
 export const LOGO_URL = 'https://i.ibb.co.com/0R3MsqSp/Logo-Dragonbowl-removebg-preview.png';
 
 export const KATEGORI_BARANG = [
@@ -20,10 +20,11 @@ export interface MasterBarang {
 }
 
 export interface StokHarian {
-  barang_id: string;
-  nama_barang?: string;
-  kategori?: string;
-  satuan?: string;
+  id: string;
+  nama_barang: string;
+  kategori: string;
+  satuan: string;
+  stok_minimum: number;
   stok_awal: number;
   prepare: number;
   terjual: number;
