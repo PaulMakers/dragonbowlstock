@@ -15,7 +15,8 @@ import {
   Filter,
   CheckCircle2,
   AlertCircle,
-  Database
+  Database,
+  ShoppingCart
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { id as localeId } from 'date-fns/locale';
@@ -26,6 +27,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from '@/lib/utils';
 
 export default function CekStokPage() {
@@ -54,24 +56,33 @@ export default function CekStokPage() {
     fetchData();
   }, [date]);
 
-  const handleInputChange = (id: string, field: 'stok_awal' | 'terjual' | 'stok_fisik', value: string) => {
+  const handleInputChange = (id: string, field: keyof StokHarian, value: any) => {
     setItems(prev => prev.map(item => {
       if (item.id === id) {
-        const val = Number(value) || 0;
-        const newItem = { ...item, [field]: val };
+        const newItem = { ...item, [field]: value };
         
-        // Rumus Bisnis: Stok Teoritis = Stok Awal + Prepare - Terjual
-        const stokTeoritis = (Number(newItem.stok_awal) || 0) + (Number(newItem.prepare) || 0) - (Number(newItem.terjual) || 0);
+        // Hanya hitung ulang jika yang diubah adalah angka stok
+        if (['stok_awal', 'terjual', 'stok_fisik'].includes(field as string)) {
+          const sAwal = Number(field === 'stok_awal' ? value : item.stok_awal) || 0;
+          const sTerjual = Number(field === 'terjual' ? value : item.terjual) || 0;
+          const sFisik = Number(field === 'stok_fisik' ? value : item.stok_fisik) || 0;
+          const prepare = Number(item.prepare) || 0;
+
+          const stokTeoritis = sAwal + prepare - sTerjual;
+          const selisih = sFisik - stokTeoritis;
+          
+          return { 
+            ...newItem, 
+            stok_awal: sAwal,
+            terjual: sTerjual,
+            stok_fisik: sFisik,
+            stok_teoritis: stokTeoritis, 
+            selisih: selisih,
+            status: selisih === 0 ? 'Balance' : 'Selisih'
+          };
+        }
         
-        // Selisih = Stok Fisik - Stok Teoritis
-        const selisih = (Number(newItem.stok_fisik) || 0) - stokTeoritis;
-        
-        return { 
-          ...newItem, 
-          stok_teoritis: stokTeoritis, 
-          selisih: selisih,
-          status: selisih === 0 ? 'Balance' : 'Selisih'
-        };
+        return newItem;
       }
       return item;
     }));
@@ -140,9 +151,9 @@ export default function CekStokPage() {
 
       <Alert className="bg-blue-500/10 border-blue-500/20 rounded-2xl mb-6">
         <Database className="h-5 w-5 text-blue-500" />
-        <AlertTitle className="font-bold">Inisialisasi Stok Awal</AlertTitle>
+        <AlertTitle className="font-bold">Informasi Stok</AlertTitle>
         <AlertDescription className="text-sm">
-          Untuk penggunaan pertama kali, silakan isi kolom <b>Stok Awal</b> secara manual. Selanjutnya, stok awal akan diambil dari stok fisik hari kemarin.
+          Kolom <b>Manual?</b> digunakan jika Anda ingin menandai barang perlu dipesan meskipun stok fisik masih mencukupi secara sistem.
         </AlertDescription>
       </Alert>
 
@@ -180,19 +191,22 @@ export default function CekStokPage() {
               <TableHeader>
                 <TableRow className="bg-muted/50">
                   <TableHead className="min-w-[150px]">Barang</TableHead>
-                  <TableHead className="w-24 text-center">Stok Awal</TableHead>
-                  <TableHead className="text-center">Prepare</TableHead>
-                  <TableHead className="w-24 text-center">Terjual</TableHead>
-                  <TableHead className="text-center">Teoritis</TableHead>
-                  <TableHead className="w-24 text-center">Stok Fisik</TableHead>
-                  <TableHead className="text-center">Selisih</TableHead>
+                  <TableHead className="w-20 text-center">Stok Awal</TableHead>
+                  <TableHead className="text-center">Prep</TableHead>
+                  <TableHead className="w-20 text-center">Jual</TableHead>
+                  <TableHead className="text-center">Teori</TableHead>
+                  <TableHead className="w-20 text-center">Fisik</TableHead>
+                  <TableHead className="text-center">Slisih</TableHead>
                   <TableHead className="text-center">Status</TableHead>
-                  <TableHead className="text-center">Status Stok</TableHead>
+                  <TableHead className="text-center">Manual?</TableHead>
+                  <TableHead className="text-center">Order?</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filtered.map((item) => {
-                  const isPerluStock = Number(item.stok_fisik) <= (Number(item.stok_minimum) || 0);
+                  const isAutoPerluStock = Number(item.stok_fisik) <= (Number(item.stok_minimum) || 0);
+                  const showPerluStock = isAutoPerluStock || item.perlu_stock_manual;
+                  
                   return (
                     <TableRow key={item.id} className="hover:bg-muted/30">
                       <TableCell>
@@ -202,47 +216,56 @@ export default function CekStokPage() {
                       <TableCell>
                         <Input 
                           type="number" 
-                          className="h-9 text-center rounded-lg bg-blue-500/5 border-blue-500/30 font-bold focus:ring-blue-500" 
+                          className="h-9 text-center rounded-lg bg-blue-500/5 border-blue-500/30 font-bold" 
                           value={item.stok_awal === 0 ? '' : item.stok_awal}
-                          placeholder="0"
                           onChange={(e) => handleInputChange(item.id, 'stok_awal', e.target.value)}
                         />
                       </TableCell>
-                      <TableCell className="text-center font-medium">{item.prepare || 0}</TableCell>
+                      <TableCell className="text-center font-medium text-xs">{item.prepare || 0}</TableCell>
                       <TableCell>
                         <Input 
                           type="number" 
                           className="h-9 text-center rounded-lg" 
                           value={item.terjual === 0 ? '' : item.terjual}
-                          placeholder="0"
                           onChange={(e) => handleInputChange(item.id, 'terjual', e.target.value)}
                         />
                       </TableCell>
-                      <TableCell className="text-center font-bold text-blue-600">{item.stok_teoritis || 0}</TableCell>
+                      <TableCell className="text-center font-bold text-blue-600 text-xs">{item.stok_teoritis || 0}</TableCell>
                       <TableCell>
                         <Input 
                           type="number" 
                           className="h-9 text-center rounded-lg border-primary/40 font-bold" 
                           value={item.stok_fisik === 0 ? '' : item.stok_fisik}
-                          placeholder="0"
                           onChange={(e) => handleInputChange(item.id, 'stok_fisik', e.target.value)}
                         />
                       </TableCell>
                       <TableCell className={cn(
-                        "text-center font-bold",
+                        "text-center font-bold text-xs",
                         item.selisih > 0 ? "text-green-600" : item.selisih < 0 ? "text-destructive" : ""
                       )}>
                         {item.selisih || 0}
                       </TableCell>
                       <TableCell className="text-center">
-                        <Badge variant={item.status === 'Balance' ? 'secondary' : 'destructive'} className="text-[10px]">
+                        <Badge variant={item.status === 'Balance' ? 'secondary' : 'destructive'} className="text-[9px] px-1 h-5">
                           {item.status || 'Balance'}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-center">
-                        {isPerluStock ? (
-                          <Badge variant="outline" className="text-[10px] text-destructive border-destructive animate-pulse">
-                            Perlu Stok
+                        <div className="flex justify-center">
+                          <Checkbox 
+                            checked={item.perlu_stock_manual}
+                            onCheckedChange={(checked) => handleInputChange(item.id, 'perlu_stock_manual', checked === true)}
+                            className="h-5 w-5"
+                          />
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {showPerluStock ? (
+                          <Badge variant="outline" className={cn(
+                            "text-[9px] px-1 h-5 animate-pulse",
+                            item.perlu_stock_manual ? "text-orange-500 border-orange-500" : "text-destructive border-destructive"
+                          )}>
+                            Pesan
                           </Badge>
                         ) : (
                           <CheckCircle2 className="h-4 w-4 text-green-500 mx-auto" />
