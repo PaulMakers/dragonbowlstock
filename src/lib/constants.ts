@@ -1,4 +1,4 @@
-export const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz8PTFmNrqQ067PuXNAAWEqtGLn8d6Ut-J6TIz6NkuP4mO9FsW6q2MbZe5FzEYZ2vmQ/exec';
+export const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxmZe8USb9g7INkig6Xt4PV-BGt5eLe8gD-61V-RZ_pyzh7H28U4fg8-eA3swNpZoQ/exec';
 export const LOGO_URL = 'https://i.ibb.co.com/0R3MsqSp/Logo-Dragonbowl-removebg-preview.png';
 
 export const KATEGORI_BARANG = [
