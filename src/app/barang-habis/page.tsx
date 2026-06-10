@@ -16,19 +16,16 @@ import {
   Calendar as CalendarIcon, 
   CheckCircle2,
   Loader2,
-  AlertCircle,
   Plus,
   Tag,
   Package,
   Sparkles,
-  X
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { id as localeId } from 'date-fns/locale';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Textarea } from '@/components/ui/textarea';
-import { Separator } from '@/components/ui/separator';
 import { KATEGORI_BARANG } from '@/lib/constants';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { parseStockReport } from '@/ai/flows/parse-stock-report-flow';
@@ -56,7 +53,17 @@ export default function BarangHabisPage() {
   const [aiInput, setAiInput] = useState('');
   const [parsing, setParsing] = useState(false);
 
+  // Load Draft & Master on Mount
   useEffect(() => {
+    const savedDraft = localStorage.getItem('db_lapor_draft');
+    if (savedDraft) {
+      try {
+        setEntries(JSON.parse(savedDraft));
+      } catch (e) {
+        console.error("Gagal memuat draft");
+      }
+    }
+
     async function loadMaster() {
       setLoading(true);
       try {
@@ -70,6 +77,11 @@ export default function BarangHabisPage() {
     }
     loadMaster();
   }, [toast]);
+
+  // Save Draft on Change
+  useEffect(() => {
+    localStorage.setItem('db_lapor_draft', JSON.stringify(entries));
+  }, [entries]);
 
   const addEntry = () => {
     setEntries([...entries, { kategori: '', namaBarang: '', jumlah: '', satuan: '', status: 'Habis', catatan: '' }]);
@@ -135,7 +147,9 @@ export default function BarangHabisPage() {
         });
       }
       toast({ title: 'Berhasil', description: 'Laporan barang telah disimpan.' });
-      setEntries([{ kategori: '', namaBarang: '', jumlah: '', satuan: '', status: 'Habis', catatan: '' }]);
+      const emptyEntry = [{ kategori: '', namaBarang: '', jumlah: '', satuan: '', status: 'Habis', catatan: '' }];
+      setEntries(emptyEntry);
+      localStorage.removeItem('db_lapor_draft');
     } catch (err) {
       toast({ variant: 'destructive', title: 'Error', description: 'Gagal menyimpan data.' });
     } finally {
@@ -199,10 +213,10 @@ export default function BarangHabisPage() {
                     <div className="space-y-2">
                       <Label className="flex items-center gap-2"><Tag className="h-3 w-3" /> Pilih Kategori</Label>
                       <Select value={entry.kategori} onValueChange={(v) => updateEntry(index, 'kategori', v)}>
-                        <SelectTrigger className="h-11 rounded-xl" side="bottom">
+                        <SelectTrigger className="h-11 rounded-xl">
                           <SelectValue placeholder="Pilih Kategori" />
                         </SelectTrigger>
-                        <SelectContent side="bottom" position="popper">
+                        <SelectContent side="bottom">
                           {KATEGORI_BARANG.map((cat) => (
                             <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                           ))}
@@ -217,10 +231,10 @@ export default function BarangHabisPage() {
                         onValueChange={(v) => updateEntry(index, 'namaBarang', v)}
                         disabled={!entry.kategori}
                       >
-                        <SelectTrigger className="h-11 rounded-xl" side="bottom">
+                        <SelectTrigger className="h-11 rounded-xl">
                           <SelectValue placeholder={entry.kategori ? "Pilih Nama Barang" : "Pilih Kategori Dulu"} />
                         </SelectTrigger>
-                        <SelectContent side="bottom" position="popper">
+                        <SelectContent side="bottom">
                           {filteredMaster.map((item: any) => (
                             <SelectItem key={item.id} value={item.nama_barang}>{item.nama_barang}</SelectItem>
                           ))}
@@ -236,10 +250,10 @@ export default function BarangHabisPage() {
                     <div className="space-y-2">
                       <Label>Status</Label>
                       <Select value={entry.status} onValueChange={(v) => updateEntry(index, 'status', v)}>
-                        <SelectTrigger className="h-11 rounded-xl" side="bottom">
+                        <SelectTrigger className="h-11 rounded-xl">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent side="bottom" position="popper">
+                        <SelectContent side="bottom">
                           <SelectItem value="Habis">Stok Sudah Habis</SelectItem>
                           <SelectItem value="Tersedia">Stok Masih Ada</SelectItem>
                         </SelectContent>
@@ -295,27 +309,25 @@ export default function BarangHabisPage() {
             <div className="bg-primary/5 p-4">
               <h3 className="text-lg font-bold flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-primary" />
-                Tips Lapor Cepat
+                Draf Tersimpan Otomatis
               </h3>
             </div>
             <CardContent className="p-6 space-y-4">
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Punya catatan sisa stok di WhatsApp? Klik <b>"Lapor Pakai AI"</b> lalu tempel teks Anda. Sistem akan otomatis mengisi form untuk Anda.
+                Aplikasi menyimpan perubahan Anda secara otomatis. Jangan takut me-refresh halaman, data yang sudah diketik akan tetap ada.
               </p>
-              <div className="space-y-3">
-                <div className="flex gap-3 text-sm">
-                  <div className="h-5 w-5 rounded bg-green-500/10 text-green-500 flex items-center justify-center font-bold">1</div>
-                  <span>Klik Tombol <b>Lapor Pakai AI</b>.</span>
-                </div>
-                <div className="flex gap-3 text-sm">
-                  <div className="h-5 w-5 rounded bg-green-500/10 text-green-500 flex items-center justify-center font-bold">2</div>
-                  <span>Tempel teks catatan stok Anda.</span>
-                </div>
-                <div className="flex gap-3 text-sm">
-                  <div className="h-5 w-5 rounded bg-green-500/10 text-green-500 flex items-center justify-center font-bold">3</div>
-                  <span>Periksa & Klik Simpan.</span>
-                </div>
-              </div>
+              <Button 
+                variant="ghost" 
+                className="w-full text-xs text-destructive hover:bg-destructive/5"
+                onClick={() => {
+                  if(confirm("Hapus draf ini?")) {
+                    setEntries([{ kategori: '', namaBarang: '', jumlah: '', satuan: '', status: 'Habis', catatan: '' }]);
+                    localStorage.removeItem('db_lapor_draft');
+                  }
+                }}
+              >
+                Hapus Draf & Mulai Ulang
+              </Button>
             </CardContent>
           </Card>
         </div>

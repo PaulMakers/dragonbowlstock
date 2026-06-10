@@ -16,7 +16,6 @@ import {
   Filter,
   CheckCircle2,
   Database,
-  ShoppingCart,
   AlertCircle
 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -45,7 +44,20 @@ export default function CekStokPage() {
     try {
       const tgl = format(date, 'dd MMMM yyyy', { locale: localeId });
       const res = await callBackend('getStokHarian', { tanggal: tgl });
-      setItems(res.data || []);
+      const serverItems = res.data || [];
+      
+      // Load draft from localstorage for this specific date
+      const savedDraft = localStorage.getItem(`db_cekstok_draft_${tgl}`);
+      if (savedDraft) {
+        const draft = JSON.parse(savedDraft);
+        const merged = serverItems.map((sItem: StokHarian) => {
+          const dItem = draft.find((d: any) => d.id === sItem.id);
+          return dItem ? { ...sItem, ...dItem } : sItem;
+        });
+        setItems(merged);
+      } else {
+        setItems(serverItems);
+      }
     } catch (err) {
       toast({ variant: 'destructive', title: 'Error', description: 'Gagal memuat data.' });
     } finally {
@@ -57,35 +69,53 @@ export default function CekStokPage() {
     fetchData();
   }, [date]);
 
-  const handleInputChange = (id: string, field: keyof StokHarian, value: any) => {
-    setItems(prev => prev.map(item => {
-      if (item.id === id) {
-        const newItem = { ...item, [field]: value };
-        
-        if (['stok_awal', 'terjual', 'stok_fisik'].includes(field as string)) {
-          const sAwal = Number(field === 'stok_awal' ? value : item.stok_awal) || 0;
-          const sTerjual = Number(field === 'terjual' ? value : item.terjual) || 0;
-          const sFisik = Number(field === 'stok_fisik' ? value : item.stok_fisik) || 0;
-          const prepare = Number(item.prepare) || 0;
-
-          const stokTeoritis = sAwal + prepare - sTerjual;
-          const selisih = sFisik - stokTeoritis;
-          
-          return { 
-            ...newItem, 
-            stok_awal: sAwal,
-            terjual: sTerjual,
-            stok_fisik: sFisik,
-            stok_teoritis: stokTeoritis, 
-            selisih: selisih,
-            status: selisih === 0 ? 'Balance' : 'Selisih'
-          };
-        }
-        
-        return newItem;
-      }
-      return item;
+  // Save draft to localStorage on every item change
+  const saveDraft = (currentItems: StokHarian[]) => {
+    const tgl = format(date, 'dd MMMM yyyy', { locale: localeId });
+    // Only save essential edited fields to draft
+    const draftData = currentItems.map(i => ({
+      id: i.id,
+      stok_awal: i.stok_awal,
+      terjual: i.terjual,
+      stok_fisik: i.stok_fisik,
+      perlu_stock_manual: i.perlu_stock_manual,
+      catatan: i.catatan
     }));
+    localStorage.setItem(`db_cekstok_draft_${tgl}`, JSON.stringify(draftData));
+  };
+
+  const handleInputChange = (id: string, field: keyof StokHarian, value: any) => {
+    setItems(prev => {
+      const newItems = prev.map(item => {
+        if (item.id === id) {
+          const newItem = { ...item, [field]: value };
+          
+          if (['stok_awal', 'terjual', 'stok_fisik'].includes(field as string)) {
+            const sAwal = Number(field === 'stok_awal' ? value : item.stok_awal) || 0;
+            const sTerjual = Number(field === 'terjual' ? value : item.terjual) || 0;
+            const sFisik = Number(field === 'stok_fisik' ? value : item.stok_fisik) || 0;
+            const prepare = Number(item.prepare) || 0;
+
+            const stokTeoritis = sAwal + prepare - sTerjual;
+            const selisih = sFisik - stokTeoritis;
+            
+            return { 
+              ...newItem, 
+              stok_awal: sAwal,
+              terjual: sTerjual,
+              stok_fisik: sFisik,
+              stok_teoritis: stokTeoritis, 
+              selisih: selisih,
+              status: selisih === 0 ? 'Balance' : 'Selisih'
+            };
+          }
+          return newItem;
+        }
+        return item;
+      });
+      saveDraft(newItems);
+      return newItems;
+    });
   };
 
   const handleSave = async () => {
@@ -97,6 +127,7 @@ export default function CekStokPage() {
         items: items
       });
       toast({ title: 'Berhasil', description: 'Data cek stok telah disimpan.' });
+      localStorage.removeItem(`db_cekstok_draft_${tgl}`);
     } catch (err) {
       toast({ variant: 'destructive', title: 'Error', description: 'Gagal menyimpan data.' });
     } finally {
@@ -123,7 +154,7 @@ export default function CekStokPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-headline font-bold">Cek Stok Barang</h1>
-          <p className="text-muted-foreground">Input stok awal, terjual, dan fisik untuk hitung selisih.</p>
+          <p className="text-muted-foreground">Input stok harian untuk kontrol selisih.</p>
         </div>
         
         <div className="flex items-center gap-2">
@@ -151,9 +182,9 @@ export default function CekStokPage() {
 
       <Alert className="bg-blue-500/10 border-blue-500/20 rounded-2xl mb-6">
         <Database className="h-5 w-5 text-blue-500" />
-        <AlertTitle className="font-bold">Inisialisasi Stok</AlertTitle>
+        <AlertTitle className="font-bold">Fitur Auto-Draft Aktif</AlertTitle>
         <AlertDescription className="text-sm">
-          Gunakan toggle <b>Perlu Stok</b> jika barang harus segera dipesan meskipun stok fisik masih mencukupi.
+          Perubahan yang Anda ketik disimpan otomatis di browser ini. Data hanya terkirim ke Google Sheets saat Anda klik <b>Simpan Cek Stok</b>.
         </AlertDescription>
       </Alert>
 
@@ -184,7 +215,7 @@ export default function CekStokPage() {
           {loading ? (
             <div className="py-20 text-center">
               <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-              <p className="text-muted-foreground">Menganalisis data stok...</p>
+              <p className="text-muted-foreground">Menghubungkan ke database...</p>
             </div>
           ) : (
             <Table>
@@ -198,8 +229,8 @@ export default function CekStokPage() {
                   <TableHead className="w-20 text-center">Fisik</TableHead>
                   <TableHead className="text-center">Slisih</TableHead>
                   <TableHead className="text-center">Status</TableHead>
-                  <TableHead className="text-center">Perlu Stok</TableHead>
-                  <TableHead className="text-center">Status Pesan</TableHead>
+                  <TableHead className="text-center">Manual?</TableHead>
+                  <TableHead className="text-center">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -278,22 +309,6 @@ export default function CekStokPage() {
           )}
         </CardContent>
       </Card>
-
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
-        {[
-          { label: 'Selisih Positif', value: summary.pos, color: 'text-green-600' },
-          { label: 'Selisih Negatif', value: summary.neg, color: 'text-destructive' },
-          { label: 'Barang Selisih', value: summary.selisihCount, color: 'text-orange-500' },
-          { label: 'Barang Balance', value: summary.balanceCount, color: 'text-blue-600' },
-        ].map((s, i) => (
-          <Card key={i} className="border-none bg-card card-shadow rounded-xl">
-            <CardContent className="p-4 flex flex-col items-center justify-center">
-              <p className="text-[10px] uppercase font-bold text-muted-foreground mb-1">{s.label}</p>
-              <h4 className={cn("text-xl font-bold", s.color)}>{s.value}</h4>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
     </DashboardLayout>
   );
 }
