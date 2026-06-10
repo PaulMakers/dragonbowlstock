@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react';
@@ -61,7 +62,7 @@ export default function PrepareBarangPage() {
       await callBackend('saveStokHarian', { 
         tanggal: tgl,
         items: items.map(i => ({
-          id: i.id,
+          ...i,
           stok_awal: i.stok_awal || 0,
           prepare: i.prepare || 0,
           terjual: i.terjual || 0,
@@ -69,7 +70,8 @@ export default function PrepareBarangPage() {
           stok_fisik: i.stok_fisik || 0,
           selisih: (i.stok_fisik || 0) - ((i.stok_awal || 0) + (i.prepare || 0) - (i.terjual || 0)),
           status: (i.stok_fisik || 0) - ((i.stok_awal || 0) + (i.prepare || 0) - (i.terjual || 0)) === 0 ? 'Balance' : 'Selisih',
-          catatan: i.catatan || ''
+          // Sertakan field toggle agar tidak terhapus saat simpan prepare
+          perlu_stock_manual: i.perlu_stock_manual || false 
         }))
       });
       toast({ title: 'Berhasil', description: 'Data prepare telah disimpan.' });

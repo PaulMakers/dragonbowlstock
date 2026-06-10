@@ -15,12 +15,12 @@ Aplikasi ini dilengkapi dengan **Lapor Cepat via AI**. Anda bisa menyalin catata
 
 ## Struktur Database (Google Sheets)
 Aplikasi menggunakan struktur 10 kolom:
-`id | timestamp | tanggal | namaBarang | jumlah | satuan | status | catatan | inputOleh | kategori`
+`id | stok_awal | prepare | terjual | stok_teoritis | stok_fisik | selisih | status | catatan | perlu_stock_manual`
 
-## Pengaturan Google Apps Script (v3.3+)
+## Pengaturan Google Apps Script (v3.4)
 1. Buka Google Sheets Anda.
 2. Klik **Extensions > Apps Script**.
-3. Pastikan menggunakan kode **v3.3 FULL VERSION** (atau versi terbaru dari asisten).
+3. Gunakan kode **v3.4 FULL VERSION** (mendukung kolom ke-10 untuk Toggle Perlu Stok).
 4. Klik **Deploy > New Deployment**.
 5. Pilih **Web App**, set akses ke **"Anyone"**.
 6. Salin URL hasil deploy ke file `src/lib/constants.ts`.

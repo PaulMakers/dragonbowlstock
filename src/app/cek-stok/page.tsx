@@ -72,7 +72,6 @@ export default function CekStokPage() {
   // Save draft to localStorage on every item change
   const saveDraft = (currentItems: StokHarian[]) => {
     const tgl = format(date, 'dd MMMM yyyy', { locale: localeId });
-    // Only save essential edited fields to draft
     const draftData = currentItems.map(i => ({
       id: i.id,
       stok_awal: i.stok_awal,
@@ -126,10 +125,10 @@ export default function CekStokPage() {
         tanggal: tgl,
         items: items
       });
-      toast({ title: 'Berhasil', description: 'Data cek stok telah disimpan.' });
+      toast({ title: 'Berhasil', description: 'Data cek stok telah disimpan ke Excel.' });
       localStorage.removeItem(`db_cekstok_draft_${tgl}`);
     } catch (err) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Gagal menyimpan data.' });
+      toast({ variant: 'destructive', title: 'Error', description: 'Gagal menyimpan ke Excel. Pastikan Apps Script v3.4 sudah di-deploy.' });
     } finally {
       setSaving(false);
     }
@@ -140,14 +139,6 @@ export default function CekStokPage() {
     const matchCat = filterCat === 'Semua' || i.kategori === filterCat;
     return matchSearch && matchCat;
   });
-
-  const summary = useMemo(() => {
-    const pos = filtered.reduce((acc, curr) => acc + (curr.selisih > 0 ? curr.selisih : 0), 0);
-    const neg = filtered.reduce((acc, curr) => acc + (curr.selisih < 0 ? curr.selisih : 0), 0);
-    const selisihCount = filtered.filter(i => i.selisih !== 0).length;
-    const balanceCount = filtered.filter(i => i.selisih === 0).length;
-    return { pos, neg, selisihCount, balanceCount };
-  }, [filtered]);
 
   return (
     <DashboardLayout>
@@ -182,9 +173,9 @@ export default function CekStokPage() {
 
       <Alert className="bg-blue-500/10 border-blue-500/20 rounded-2xl mb-6">
         <Database className="h-5 w-5 text-blue-500" />
-        <AlertTitle className="font-bold">Fitur Auto-Draft Aktif</AlertTitle>
+        <AlertTitle className="font-bold">Data Disimpan di Browser (Auto-Draft)</AlertTitle>
         <AlertDescription className="text-sm">
-          Perubahan yang Anda ketik disimpan otomatis di browser ini. Data hanya terkirim ke Google Sheets saat Anda klik <b>Simpan Cek Stok</b>.
+          Perubahan Anda aman dan tidak akan hilang saat refresh. Namun, Anda <b>WAJIB</b> klik tombol <b>Simpan Cek Stok</b> di atas agar data masuk ke Excel.
         </AlertDescription>
       </Alert>
 
@@ -230,12 +221,12 @@ export default function CekStokPage() {
                   <TableHead className="text-center">Slisih</TableHead>
                   <TableHead className="text-center">Status</TableHead>
                   <TableHead className="text-center">Manual?</TableHead>
-                  <TableHead className="text-center">Action</TableHead>
+                  <TableHead className="text-center">Notif</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filtered.map((item) => {
-                  const isAutoPerluStock = Number(item.stok_fisik) <= (Number(item.stok_minimum) || 0);
+                  const isAutoPerluStock = Number(item.stok_fisik) > 0 && Number(item.stok_fisik) <= (Number(item.stok_minimum) || 0);
                   const showPerluStock = isAutoPerluStock || item.perlu_stock_manual;
                   
                   return (
