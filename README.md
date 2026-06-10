@@ -4,32 +4,28 @@ Sistem manajemen stok cerdas untuk Dragon Bowl Cafe & Restaurant menggunakan Nex
 
 ## Struktur Database (Google Sheets)
 
-Aplikasi ini membutuhkan struktur kolom tertentu di Google Sheets:
+Aplikasi ini menggunakan struktur 10 kolom pada setiap sheet transaksi harian:
+`id | timestamp | tanggal | namaBarang | jumlah | satuan | status | catatan | inputOleh | kategori`
 
-### 1. Sheet `pengguna`
-Kolom: `id | username | password | nama | role`
+### Rumus Bisnis
+1. **Stok Teoritis** = Stok Awal + Prepare - Terjual
+2. **Selisih** = Stok Fisik - Stok Teoritis
+3. **Status** = "Balance" (jika selisih 0) atau "Selisih" (jika tidak 0)
+4. **Perlu Stock** = Otomatis menyala jika `Stok Fisik <= Stok Minimum`
 
-### 2. Sheet `master_barang`
-Kolom: `id | namaBarang | kategori | createdAt`
-
-### 3. Sheet Transaksi (Nama Sheet = Tanggal, misal: "05 Juni 2024")
-Kolom (10 Kolom):
-1. `id`
-2. `timestamp`
-3. `tanggal`
-4. `namaBarang`
-5. `jumlah`
-6. `satuan`
-7. `status`
-8. `catatan`
-9. `inputOleh`
-10. `kategori`
-
-## Pengaturan Google Apps Script
+## Pengaturan Google Apps Script (v3.3)
 
 1. Buka Google Sheets Anda.
 2. Klik **Extensions > Apps Script**.
-3. Salin kode dari file `Code.gs` yang disediakan asisten.
+3. Pastikan menggunakan kode **v3.3 FULL VERSION** yang mendukung fitur *Bulk Save* dan *Dashboard Stats*.
 4. Klik **Deploy > New Deployment**.
 5. Pilih **Web App**, set akses ke **"Anyone"**.
-6. Salin URL hasil deploy ke file `src/lib/constants.ts` di aplikasi ini.
+6. Salin URL hasil deploy ke file `src/lib/constants.ts`.
+
+## Masalah Autentikasi Git (Push)
+
+Jika Anda menemui error `Authentication failed` saat `git push`, gunakan **Personal Access Token (PAT)**:
+1. Generate PAT di GitHub (Settings > Developer Settings).
+2. Jalankan perintah: 
+   `git remote set-url origin https://USERNAME:TOKEN@github.com/PaulMakers/dragonbowlstock.git`
+3. Lakukan `git push` kembali.
