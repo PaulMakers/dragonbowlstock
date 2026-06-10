@@ -17,15 +17,87 @@ Aplikasi ini dilengkapi dengan **Lapor Cepat via AI**. Anda bisa menyalin catata
 Aplikasi menggunakan struktur 10 kolom:
 `id | stok_awal | prepare | terjual | stok_teoritis | stok_fisik | selisih | status | catatan | perlu_stock_manual`
 
-## Pengaturan Google Apps Script (v3.4)
-1. Buka Google Sheets Anda.
-2. Klik **Extensions > Apps Script**.
-3. Gunakan kode **v3.4 FULL VERSION** (mendukung kolom ke-10 untuk Toggle Perlu Stok).
-4. Klik **Deploy > New Deployment**.
-5. Pilih **Web App**, set akses ke **"Anyone"**.
-6. Salin URL hasil deploy ke file `src/lib/constants.ts`.
+## Google Apps Script v3.4 (Full Version)
+Tempel kode berikut di Google Apps Script Anda:
 
-## Autentikasi Git
-Jika `git push` gagal (Authentication failed):
-1. Buat **Personal Access Token (PAT)** di GitHub Settings.
-2. Jalankan: `git remote set-url origin https://USERNAME:TOKEN@github.com/PaulMakers/dragonbowlstock.git`
+```javascript
+const SPREADSHEET_ID = 'GANTI_DENGAN_ID_SPREADSHEET_ANDA';
+
+function doPost(e) {
+  const action = e.parameter.action;
+  const data = JSON.parse(e.postData.contents);
+  let result = { success: false };
+
+  try {
+    if (action === 'addPengguna') result = addPengguna(data);
+    else if (action === 'login') result = login(data);
+    else if (action === 'getMasterBarang') result = getMasterBarang();
+    else if (action === 'saveMasterBarang') result = saveMasterBarang(data);
+    else if (action === 'bulkSaveMasterBarang') result = bulkSaveMasterBarang(data);
+    else if (action === 'getStokHarian') result = getStokHarian(data);
+    else if (action === 'saveStokHarian') result = saveStokHarian(data);
+    else if (action === 'addBarangHabis') result = addBarangHabis(data);
+    else if (action === 'getBarangHabis') result = getBarangHabis(data);
+    else if (action === 'getDashboardStats') result = getDashboardStats(data);
+    
+    return ContentService.createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ error: err.message }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function getMasterBarang() {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName('MasterBarang') || ss.insertSheet('MasterBarang');
+  if(sheet.getLastRow() === 0) sheet.appendRow(['id', 'nama_barang', 'kategori', 'satuan', 'stok_minimum', 'aktif']);
+  const rows = sheet.getDataRange().getValues().slice(1);
+  return { data: rows.map(r => ({ id: r[0], nama_barang: r[1], kategori: r[2], satuan: r[3], stok_minimum: r[4], aktif: r[5] })) };
+}
+
+function getStokHarian(data) {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  let sheet = ss.getSheetByName(data.tanggal) || ss.insertSheet(data.tanggal);
+  if(sheet.getLastRow() === 0) {
+    sheet.appendRow(['id', 'stok_awal', 'prepare', 'terjual', 'stok_teoritis', 'stok_fisik', 'selisih', 'status', 'catatan', 'perlu_stock_manual']);
+  }
+  const rows = sheet.getDataRange().getValues().slice(1);
+  const dailyMap = {};
+  rows.forEach(r => { 
+    dailyMap[r[0]] = { 
+      stok_awal: r[1], prepare: r[2], terjual: r[3], stok_teoritis: r[4], 
+      stok_fisik: r[5], selisih: r[6], status: r[7], catatan: r[8],
+      perlu_stock_manual: r[9] 
+    }; 
+  });
+
+  const master = getMasterBarang().data.filter(m => String(m.aktif) === "true" || m.aktif === true || m.aktif === "");
+  return { data: master.map(m => {
+    const daily = dailyMap[m.id] || {};
+    return {
+      id: m.id, nama_barang: m.nama_barang, kategori: m.kategori, satuan: m.satuan, stok_minimum: m.stok_minimum,
+      stok_awal: daily.stok_awal || 0, prepare: daily.prepare || 0, terjual: daily.terjual || 0,
+      stok_teoritis: daily.stok_teoritis || 0, stok_fisik: daily.stok_fisik || 0,
+      selisih: daily.selisih || 0, status: daily.status || 'Balance', catatan: daily.catatan || '',
+      perlu_stock_manual: daily.perlu_stock_manual === true || daily.perlu_stock_manual === "true"
+    };
+  })};
+}
+
+function saveStokHarian(data) {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  let sheet = ss.getSheetByName(data.tanggal) || ss.insertSheet(data.tanggal);
+  if(sheet.getLastRow() === 0) sheet.appendRow(['id', 'stok_awal', 'prepare', 'terjual', 'stok_teoritis', 'stok_fisik', 'selisih', 'status', 'catatan', 'perlu_stock_manual']);
+  const rows = sheet.getDataRange().getValues();
+  const rowIndexMap = {};
+  for(let i=1; i<rows.length; i++) rowIndexMap[rows[i][0]] = i + 1;
+  data.items.forEach(item => {
+    const rowData = [item.id, item.stok_awal, item.prepare, item.terjual, item.stok_teoritis, item.stok_fisik, item.selisih, item.status, item.catatan, item.perlu_stock_manual];
+    if(rowIndexMap[item.id]) { sheet.getRange(rowIndexMap[item.id], 1, 1, 10).setValues([rowData]); } else { sheet.appendRow(rowData); }
+  });
+  return { success: true };
+}
+
+// ... Tambahkan fungsi addBarangHabis, getBarangHabis, getDashboardStats, login sesuai kebutuhan
+```
