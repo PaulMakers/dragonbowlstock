@@ -48,7 +48,6 @@ function doPost(e) {
     else if (action === 'addBarangHabis') result = addBarangHabis(data);
     else if (action === 'getBarangHabis') result = getBarangHabis(data);
     else if (action === 'getDashboardStats') result = getDashboardStats(data);
-    else if (action === 'getStatistik') result = getStatistik(data);
     
     return ContentService.createTextOutput(JSON.stringify(result))
       .setMimeType(ContentService.MimeType.JSON);
