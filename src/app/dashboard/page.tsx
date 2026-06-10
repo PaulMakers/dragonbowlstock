@@ -69,9 +69,9 @@ export default function DashboardPage() {
               <div className="bg-background/50 p-4 rounded-xl border border-destructive/20 text-xs space-y-2">
                 <p className="font-bold uppercase tracking-wider text-[10px] text-muted-foreground">Langkah Perbaikan:</p>
                 <ol className="list-decimal list-inside space-y-1 ml-1">
-                  <li>Buka <b>Extensions {'>'} Apps Script</b> di Google Sheets Anda.</li>
-                  <li>Hapus <b>SELURUH</b> kode yang ada di sana.</li>
-                  <li>Tempelkan kode <b>v3.3 FULL VERSION</b> terbaru dari asisten AI.</li>
+                  <li>Buka <b>Extensions {'>'} Apps Script</b> di Google Sheets.</li>
+                  <li>Pastikan baris ke-6 sudah diisi ID Spreadsheet Anda (lihat URL Sheets).</li>
+                  <li>Gunakan kode <b>v3.4 FULL VERSION</b> terbaru.</li>
                   <li>Klik <b>Deploy {'>'} New Deployment</b>.</li>
                   <li>Pastikan akses diatur ke <b>"Anyone"</b>.</li>
                 </ol>
