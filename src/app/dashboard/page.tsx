@@ -11,7 +11,8 @@ import {
   AlertCircle,
   RefreshCcw,
   Rocket,
-  ArrowRight
+  ArrowRight,
+  Sparkles
 } from 'lucide-react';
 import { callBackend } from '@/lib/api';
 import { format } from 'date-fns';
@@ -93,9 +94,17 @@ export default function DashboardPage() {
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-headline font-bold">Ringkasan Operasional</h1>
-        <p className="text-muted-foreground">{format(new Date(), 'EEEE, dd MMMM yyyy', { locale: localeId })}</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-3xl font-headline font-bold">Ringkasan Operasional</h1>
+          <p className="text-muted-foreground">{format(new Date(), 'EEEE, dd MMMM yyyy', { locale: localeId })}</p>
+        </div>
+        <Link href="/barang-habis">
+          <Button className="h-12 px-6 rounded-xl bg-primary shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all font-bold gap-2">
+            <Sparkles className="h-5 w-5" />
+            Lapor Pakai AI
+          </Button>
+        </Link>
       </div>
 
       {!loading && stats?.totalSku === 0 && (
@@ -145,22 +154,22 @@ export default function DashboardPage() {
             <div className="flex gap-4">
               <div className="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold flex-none">1</div>
               <div>
-                <p className="font-bold">Input Prepare</p>
-                <p className="text-sm text-muted-foreground">Catat jumlah barang yang disiapkan atau dibeli hari ini di menu Prepare Barang.</p>
+                <p className="font-bold">Lapor Barang (Gunakan AI)</p>
+                <p className="text-sm text-muted-foreground">Salin catatan sisa stok dari WhatsApp dan tempel di menu Lapor Barang menggunakan AI.</p>
               </div>
             </div>
             <div className="flex gap-4">
               <div className="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold flex-none">2</div>
               <div>
-                <p className="font-bold">Closing & Cek Stok</p>
-                <p className="text-sm text-muted-foreground">Di akhir shift, input jumlah terjual dan stok fisik yang ada di outlet.</p>
+                <p className="font-bold">Input Prepare</p>
+                <p className="text-sm text-muted-foreground">Catat jumlah barang yang disiapkan atau dibeli hari ini di menu Prepare Barang.</p>
               </div>
             </div>
             <div className="flex gap-4">
               <div className="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold flex-none">3</div>
               <div>
-                <p className="font-bold">Analisis Selisih</p>
-                <p className="text-sm text-muted-foreground">Sistem akan otomatis menghitung jika ada selisih antara stok teoritis dan fisik.</p>
+                <p className="font-bold">Closing & Cek Stok</p>
+                <p className="text-sm text-muted-foreground">Di akhir shift, input jumlah terjual dan stok fisik untuk melihat selisih.</p>
               </div>
             </div>
           </CardContent>

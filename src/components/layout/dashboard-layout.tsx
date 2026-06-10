@@ -6,12 +6,12 @@ import { useRouter, usePathname } from 'next/navigation';
 import { 
   LayoutDashboard, 
   Package, 
-  History, 
   Settings, 
   LogOut,
   Menu,
   FileEdit,
-  ClipboardCheck
+  ClipboardCheck,
+  MessageSquarePlus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
@@ -22,6 +22,7 @@ import { Separator } from '@/components/ui/separator';
 
 const navItems = [
   { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
+  { label: 'Lapor Barang', icon: MessageSquarePlus, href: '/barang-habis' },
   { label: 'Prepare Barang', icon: FileEdit, href: '/prepare-barang' },
   { label: 'Cek Stok Barang', icon: ClipboardCheck, href: '/cek-stok' },
   { label: 'Master Barang', icon: Package, href: '/master-barang' },
