@@ -98,7 +98,6 @@ export default function BarangHabisPage() {
     try {
       const res = await parseStockReport({ text: aiInput });
       if (res.entries && res.entries.length > 0) {
-        // Gabungkan dengan entri yang sudah ada atau ganti jika entri pertama masih kosong
         const isFirstEmpty = entries.length === 1 && !entries[0].namaBarang;
         const newEntries = isFirstEmpty ? [...res.entries] : [...entries, ...res.entries];
         setEntries(newEntries as any);
@@ -223,9 +222,11 @@ export default function BarangHabisPage() {
                         </SelectTrigger>
                         <SelectContent side="bottom" position="popper">
                           {filteredMaster.map((item: any) => (
-                            <SelectItem key={item.id} value={item.namaBarang}>{item.namaBarang}</SelectItem>
+                            <SelectItem key={item.id} value={item.nama_barang}>{item.nama_barang}</SelectItem>
                           ))}
-                          <SelectItem value={entry.namaBarang}>{entry.namaBarang} (Custom)</SelectItem>
+                          {entry.namaBarang && !filteredMaster.some(m => m.nama_barang === entry.namaBarang) && (
+                            <SelectItem value={entry.namaBarang}>{entry.namaBarang} (Custom)</SelectItem>
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
